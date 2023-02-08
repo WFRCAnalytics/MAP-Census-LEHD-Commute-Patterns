@@ -1,0 +1,572 @@
+[
+  {
+    "label": "AMERICAN FORK",
+    "value": "AFK",
+    "people_h": 12317,
+    "people_w": 22429
+  },
+  {
+    "label": "ALTA",
+    "value": "ALA",
+    "people_h": 171,
+    "people_w": 1475
+  },
+  {
+    "label": "ALPINE",
+    "value": "ALP",
+    "people_h": 4470,
+    "people_w": 2785
+  },
+  {
+    "label": "BLUFFDALE (SL CO)",
+    "value": "BDL",
+    "people_h": 6557,
+    "people_w": 4403
+  },
+  {
+    "label": "BLUFFDALE (UTAH CO)",
+    "value": "BDL",
+    "people_h": 10,
+    "people_w": 0
+  },
+  {
+    "label": "BRIGHAM CITY",
+    "value": "BGM",
+    "people_h": 9828,
+    "people_w": 8977
+  },
+  {
+    "label": "BOUNTIFUL",
+    "value": "BNT",
+    "people_h": 20162,
+    "people_w": 11439
+  },
+  {
+    "label": "BRIGHTON",
+    "value": "BRT",
+    "people_h": 76,
+    "people_w": 60
+  },
+  {
+    "label": "CEDAR FORT",
+    "value": "CDF",
+    "people_h": 322,
+    "people_w": 52
+  },
+  {
+    "label": "CENTERVILLE",
+    "value": "CEN",
+    "people_h": 7451,
+    "people_w": 5640
+  },
+  {
+    "label": "CHARLESTON",
+    "value": "CHA",
+    "people_h": 254,
+    "people_w": 189
+  },
+  {
+    "label": "CEDAR HILLS",
+    "value": "CHL",
+    "people_h": 4433,
+    "people_w": 845
+  },
+  {
+    "label": "CLEARFIELD",
+    "value": "CLF",
+    "people_h": 13327,
+    "people_w": 16589
+  },
+  {
+    "label": "CLINTON",
+    "value": "CLI",
+    "people_h": 10063,
+    "people_w": 2518
+  },
+  {
+    "label": "COALVILLE",
+    "value": "COA",
+    "people_h": 767,
+    "people_w": 607
+  },
+  {
+    "label": "COTTONWOOD HEIGHTS",
+    "value": "CWH",
+    "people_h": 17271,
+    "people_w": 20362
+  },
+  {
+    "label": "DANIEL",
+    "value": "DAN",
+    "people_h": 1094,
+    "people_w": 366
+  },
+  {
+    "label": "DRAPER CITY (SL CO)",
+    "value": "DRA",
+    "people_h": 21167,
+    "people_w": 37494
+  },
+  {
+    "label": "DRAPER CITY (UTAH CO)",
+    "value": "DRA",
+    "people_h": 1189,
+    "people_w": 184
+  },
+  {
+    "label": "EAGLE MOUNTAIN",
+    "value": "EAG",
+    "people_h": 14549,
+    "people_w": 2057
+  },
+  {
+    "label": "ELK RIDGE",
+    "value": "ELK",
+    "people_h": 1556,
+    "people_w": 310
+  },
+  {
+    "label": "FARMINGTON",
+    "value": "FAR",
+    "people_h": 9368,
+    "people_w": 9149
+  },
+  {
+    "label": "FRANCIS",
+    "value": "FCS",
+    "people_h": 445,
+    "people_w": 60
+  },
+  {
+    "label": "FAIRFIELD",
+    "value": "FFD",
+    "people_h": 79,
+    "people_w": 101
+  },
+  {
+    "label": "FARR WEST CITY",
+    "value": "FRR",
+    "people_h": 3045,
+    "people_w": 3082
+  },
+  {
+    "label": "FRUIT HEIGHTS",
+    "value": "FTH",
+    "people_h": 2201,
+    "people_w": 446
+  },
+  {
+    "label": "GENOLA",
+    "value": "GLA",
+    "people_h": 805,
+    "people_w": 162
+  },
+  {
+    "label": "GOSHEN",
+    "value": "GOS",
+    "people_h": 484,
+    "people_w": 57
+  },
+  {
+    "label": "GRANTSVILLE",
+    "value": "GRL",
+    "people_h": 5182,
+    "people_w": 1686
+  },
+  {
+    "label": "HARRISVILLE",
+    "value": "HAR",
+    "people_h": 3039,
+    "people_w": 1616
+  },
+  {
+    "label": "HIDEOUT",
+    "value": "HDT",
+    "people_h": 339,
+    "people_w": 7
+  },
+  {
+    "label": "HEBER CITY",
+    "value": "HEB",
+    "people_h": 8078,
+    "people_w": 5824
+  },
+  {
+    "label": "HERRIMAN TOWN",
+    "value": "HER",
+    "people_h": 17147,
+    "people_w": 4452
+  },
+  {
+    "label": "HIGHLAND",
+    "value": "HGH",
+    "people_h": 7786,
+    "people_w": 3028
+  },
+  {
+    "label": "HENEFER",
+    "value": "HNF",
+    "people_h": 358,
+    "people_w": 46
+  },
+  {
+    "label": "CITY OF HOLLADAY",
+    "value": "HOL",
+    "people_h": 15044,
+    "people_w": 10117
+  },
+  {
+    "label": "HOOPER",
+    "value": "HOO",
+    "people_h": 3674,
+    "people_w": 674
+  },
+  {
+    "label": "HUNTSVILLE",
+    "value": "HVL",
+    "people_h": 279,
+    "people_w": 74
+  },
+  {
+    "label": "INDEPENDENCE",
+    "value": "IND",
+    "people_h": 120,
+    "people_w": 13
+  },
+  {
+    "label": "INTERLAKEN TOWN",
+    "value": "INT",
+    "people_h": 100,
+    "people_w": 0
+  },
+  {
+    "label": "KAYSVILLE",
+    "value": "KAY",
+    "people_h": 12925,
+    "people_w": 8034
+  },
+  {
+    "label": "KAMAS",
+    "value": "KMS",
+    "people_h": 957,
+    "people_w": 1153
+  },
+  {
+    "label": "LAYTON",
+    "value": "LAY",
+    "people_h": 31902,
+    "people_w": 26964
+  },
+  {
+    "label": "LEHI",
+    "value": "LEH",
+    "people_h": 29054,
+    "people_w": 33202
+  },
+  {
+    "label": "LINDON",
+    "value": "LIN",
+    "people_h": 5073,
+    "people_w": 12517
+  },
+  {
+    "label": "MAPLETON",
+    "value": "MAP",
+    "people_h": 4599,
+    "people_w": 1921
+  },
+  {
+    "label": "MIDVALE",
+    "value": "MID",
+    "people_h": 17186,
+    "people_w": 18321
+  },
+  {
+    "label": "MILLCREEK",
+    "value": "MLC",
+    "people_h": 31447,
+    "people_w": 48610
+  },
+  {
+    "label": "MORGAN",
+    "value": "MRG",
+    "people_h": 1862,
+    "people_w": 1254
+  },
+  {
+    "label": "MARRIOTT-SLATERVILLE CITY",
+    "value": "MSL",
+    "people_h": 926,
+    "people_w": 1821
+  },
+  {
+    "label": "MURRAY",
+    "value": "MUR",
+    "people_h": 25805,
+    "people_w": 44412
+  },
+  {
+    "label": "MIDWAY",
+    "value": "MWY",
+    "people_h": 2272,
+    "people_w": 1168
+  },
+  {
+    "label": "NORTH OGDEN CITY",
+    "value": "NOG",
+    "people_h": 9109,
+    "people_w": 2792
+  },
+  {
+    "label": "CITY OF NORTH SALT LAKE",
+    "value": "NSL",
+    "people_h": 8408,
+    "people_w": 14796
+  },
+  {
+    "label": "OGDEN CITY",
+    "value": "OGD",
+    "people_h": 39719,
+    "people_w": 58127
+  },
+  {
+    "label": "OAKLEY",
+    "value": "OKL",
+    "people_h": 573,
+    "people_w": 252
+  },
+  {
+    "label": "OREM",
+    "value": "ORM",
+    "people_h": 44459,
+    "people_w": 47620
+  },
+  {
+    "label": "PAYSON",
+    "value": "PAY",
+    "people_h": 9744,
+    "people_w": 6246
+  },
+  {
+    "label": "PLEASANT GROVE",
+    "value": "PGR",
+    "people_h": 15931,
+    "people_w": 10685
+  },
+  {
+    "label": "PLAIN CITY",
+    "value": "PLN",
+    "people_h": 3055,
+    "people_w": 845
+  },
+  {
+    "label": "PARK CITY (SUMMIT CO)",
+    "value": "PRK",
+    "people_h": 3872,
+    "people_w": 11680
+  },
+  {
+    "label": "PARK CITY (WASATCH CO)",
+    "value": "PRK",
+    "people_h": 3,
+    "people_w": 0
+  },
+  {
+    "label": "PERRY CITY",
+    "value": "PRY",
+    "people_h": 2636,
+    "people_w": 906
+  },
+  {
+    "label": "PROVO",
+    "value": "PVO",
+    "people_h": 39645,
+    "people_w": 58416
+  },
+  {
+    "label": "PLEASANT VIEW",
+    "value": "PVW",
+    "people_h": 4107,
+    "people_w": 2013
+  },
+  {
+    "label": "ROY CITY",
+    "value": "ROY",
+    "people_h": 18746,
+    "people_w": 7599
+  },
+  {
+    "label": "RIVERDALE",
+    "value": "RVD",
+    "people_h": 4224,
+    "people_w": 7759
+  },
+  {
+    "label": "RIVERTON",
+    "value": "RVT",
+    "people_h": 23845,
+    "people_w": 10200
+  },
+  {
+    "label": "SANDY CITY",
+    "value": "SAN",
+    "people_h": 48817,
+    "people_w": 47939
+  },
+  {
+    "label": "SANTAQUIN CITY (UTAH CO)",
+    "value": "SAQ",
+    "people_h": 5600,
+    "people_w": 1068
+  },
+  {
+    "label": "SARATOGA SPRINGS",
+    "value": "SAR",
+    "people_h": 13797,
+    "people_w": 3498
+  },
+  {
+    "label": "SPANISH FORK",
+    "value": "SFK",
+    "people_h": 19768,
+    "people_w": 12722
+  },
+  {
+    "label": "SOUTH JORDAN",
+    "value": "SJC",
+    "people_h": 32765,
+    "people_w": 29894
+  },
+  {
+    "label": "SALT LAKE CITY",
+    "value": "SLC",
+    "people_h": 94390,
+    "people_w": 238292
+  },
+  {
+    "label": "SALEM",
+    "value": "SLM",
+    "people_h": 4107,
+    "people_w": 1602
+  },
+  {
+    "label": "SOUTH OGDEN",
+    "value": "SOG",
+    "people_h": 7868,
+    "people_w": 6794
+  },
+  {
+    "label": "SPRINGVILLE",
+    "value": "SPV",
+    "people_h": 16586,
+    "people_w": 12550
+  },
+  {
+    "label": "SOUTH SALT LAKE CITY",
+    "value": "SSL",
+    "people_h": 12031,
+    "people_w": 34040
+  },
+  {
+    "label": "SUNSET",
+    "value": "SUN",
+    "people_h": 2616,
+    "people_w": 1194
+  },
+  {
+    "label": "SOUTH WEBER",
+    "value": "SWE",
+    "people_h": 3087,
+    "people_w": 636
+  },
+  {
+    "label": "SYRACUSE",
+    "value": "SYR",
+    "people_h": 12204,
+    "people_w": 3763
+  },
+  {
+    "label": "TAYLORSVILLE CITY",
+    "value": "TAY",
+    "people_h": 31114,
+    "people_w": 20760
+  },
+  {
+    "label": "TOOELE",
+    "value": "TOO",
+    "people_h": 16940,
+    "people_w": 7716
+  },
+  {
+    "label": "UINTAH",
+    "value": "UIN",
+    "people_h": 621,
+    "people_w": 260
+  },
+  {
+    "label": "VINEYARD",
+    "value": "VIN",
+    "people_h": 90,
+    "people_w": 975
+  },
+  {
+    "label": "WASHINGTON TERRACE",
+    "value": "WAT",
+    "people_h": 4516,
+    "people_w": 3351
+  },
+  {
+    "label": "WALLSBURG",
+    "value": "WBG",
+    "people_h": 168,
+    "people_w": 54
+  },
+  {
+    "label": "WOODLAND HILLS",
+    "value": "WDL",
+    "people_h": 834,
+    "people_w": 186
+  },
+  {
+    "label": "WEST BOUNTIFUL",
+    "value": "WEB",
+    "people_h": 3172,
+    "people_w": 2169
+  },
+  {
+    "label": "WEST HAVEN",
+    "value": "WHV",
+    "people_h": 5330,
+    "people_w": 3382
+  },
+  {
+    "label": "WILLARD CITY",
+    "value": "WIL",
+    "people_h": 1017,
+    "people_w": 183
+  },
+  {
+    "label": "WEST JORDAN CITY",
+    "value": "WJC",
+    "people_h": 59157,
+    "people_w": 35776
+  },
+  {
+    "label": "WEST POINT",
+    "value": "WPT",
+    "people_h": 4737,
+    "people_w": 1049
+  },
+  {
+    "label": "WEST VALLEY CITY",
+    "value": "WVC",
+    "people_h": 63926,
+    "people_w": 68427
+  },
+  {
+    "label": "WOODS CROSS CITY",
+    "value": "WXC",
+    "people_h": 5155,
+    "people_w": 4753
+  }
+]

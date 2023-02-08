@@ -66,27 +66,55 @@ township_codes <- read_csv("data/data2019/citytownship.csv") %>%
   select(1,2)
 
 #block/city data
+blockcity <- read.dbf("data/data2018/blockcentersWBlockGroup.dbf") %>%
+  select(GEOID, GEOID10,x,y) %>% st_as_sf(coords = c("x","y"), crs = 4326) %>%
+  st_transform(crs = 4326) %>%   
+  st_as_sf() %>%
+  st_transform(26912) 
+mapview(blockcity) + 
+    mapview(sf_townships, color = "grey40")
+blockpoint_city <- st_join(blockcity, sf_townships, join = st_within)
+
 blockcity_raw <- read.dbf("data/data2018/blockpoint_City.dbf") %>%
   select(-CODE3) %>%
   left_join(township_codes, by = c("SHORTDESC" = "SHORTDESC")) %>%
   select(GEOID10, CODE3, SHORTDESC) %>%
   mutate(GEOID10 = as.numeric(as.character(GEOID10)))
 
-blockcity_wfrc <- blockcity_raw %>% filter(CODE3 %in% wfrc_towns)
-
 wfrc_towns <- c("AFK","ALA","ALP","BDL","BGM","BNT","BRT","CDF","CEN","CHA","CHL","CLF","CLI","CMT","COA","CWH","DAN","DRA","EAG","ELK","EMT","FAR","FCS","FFD","FRR","FTH","GLA","GOS","GRL","HAR","HDT","HDT","HEB","HER","HGH","HNF","HOL","HOO","HVL","IND","INT","KAY","KMS","KMT","LAY","LEH","LIN","MAP","MID","MLC","MMT","MRG","MSL","MUR","MWY","NOG","NSL","OGD","OKL","ORM","PAY","PGR","PLN","PRK","PRY","PVO","PVW","ROY","RVD","RVT","SAN","SAQ","SAR","SFK","SJC","SLC","SLM","SOG","SPV","SSL","SUN","SWE","SYR","TAY","TOO","UIN","VIN","WAT","WBG","WDL","WEB","WHT","WHV","WIL","WJC","WPT","WVC","WXC")
+
+blockcity_wfrc <- blockcity_raw %>% 
+  mutate(CODE3 = ifelse(CODE3 %in% wfrc_towns, CODE3, "XXX"),
+         SHORTDESC = ifelse(CODE3 %in% wfrc_towns, SHORTDESC, "Outside WFRC Area"))
+
 ```
 
 ### Geographic Data
 ```{r}
 sf_small_districts <- st_read("data/data2019/Dist_Small/Dist_Small.shp")
-sf_townships <- st_read("data/data2019/Municipalities_Township/Municipalities_Township.shp")
-sf_blockgroups <- st_read("data/data2019/tl_2020_49_bg/tl_2020_49_bg.shp")
+sf_townships <- st_read("data/data2019/Municipalities_Township/Municipalities_Township.shp") %>%
+  st_transform(crs = 4326) %>%   
+  st_as_sf() %>%
+  st_transform(26912) 
+sf_blockgroups <- st_read("data/data2019/tl_2020_49_bg/tl_2020_49_bg.shp") %>%
+  st_transform(crs = 4269) %>% 
+  st_as_sf() %>%
+  st_transform(26912) %>%
+  left_join(blockcity)
+sf_blockpoints <- sf_blockgroups %>%
+  st_centroid()
 sf_counties <- st_read("data/data2019/Utah_County_Boundaries-shp/Counties.shp")
 
 sf_census_counties <- st_read("data/data2019/Utah_Census_Counties_2020/CensusCounties2020.shp")
 sf_census_tracts <- st_read("data/data2019/Utah_Census_Tracts_2020/CensusTracts2020.shp")
 
+```
+## Metro Township to BG
+```{r}
+mapview(sf_blockgroups) + 
+  mapview(sf_townships, color = "grey40")
+
+blockpoint_CityTowns <- st_intersection(sf_townships, sf_blockgroups)
 ```
 
 
@@ -103,21 +131,94 @@ homeside <- left_join(lehd_raw,blockcity_raw, by = c("h_geocode" = "GEOID10")) %
   mutate(h_geocode = as.character(h_geocode), w_geocode = as.character(w_geocode))
 workside <- left_join(lehd_raw,blockcity_raw, by = c("w_geocode" = "GEOID10")) %>%
   mutate(h_geocode = as.character(h_geocode), w_geocode = as.character(w_geocode))
+homeside_wfrc <- homeside %>%
+  mutate(CODE3 = ifelse(CODE3 %in% wfrc_towns, CODE3, "XXX"),
+         SHORTDESC = ifelse(CODE3 %in% wfrc_towns, SHORTDESC, "Outside WFRC Area"))
+workside_wfrc <- workside %>%
+  mutate(CODE3 = ifelse(CODE3 %in% wfrc_towns, CODE3, "XXX"),
+         SHORTDESC = ifelse(CODE3 %in% wfrc_towns, SHORTDESC, "Outside WFRC Area"))
 ```
+
+
+
+
+
+#### Python Input
+```{r}
+blockseq <-  homeside_wfrc %>% 
+  left_join(blockcity, by = c("w_geocode" = "GEOID10")) %>%
+  expand(GEOID, CODE3 = (c(wfrc_towns,"XXX")))
+```
+
+
+```{r}
+homeside_wide <- homeside_wfrc %>%
+  left_join(blockcity, by = c("w_geocode" = "GEOID10")) %>%
+  select(-SHORTDESC, -h_geocode) %>%
+  group_by(GEOID, CODE3) %>%
+  summarize(SumS000 = sum(S000)) %>% ungroup() 
+homeside_wide_full <- blockseq %>%
+  left_join(homeside_wide)%>%
+  complete(GEOID,CODE3) %>%
+  arrange(CODE3) %>%
+  pivot_wider(names_from = CODE3, values_from = SumS000, values_fn = sum, names_glue = "{CODE3}_h") %>%
+  na_replace(0)
+homeside_wide_ttl <- homeside_wide_full %>% as.tibble() %>%
+  bind_rows(summarise(.,
+                      across(where(is.numeric), sum),
+                      across(where(is.factor), ~"colSUM"))) %>%
+  slice(n(),1:(n()-1)) %>%
+  mutate(TTL_h = rowSums(.[2:99])) %>%
+  select(-XXX_h) %>%
+  mutate(fakeid = ifelse(row_number() %in% c(1,2), 0, row_number() - 2)) %>%
+  select(100,1:99)
+
+workside_wide <- workside_wfrc %>%
+  left_join(blockcity, by = c("h_geocode" = "GEOID10")) %>%
+  select(-SHORTDESC, -w_geocode) %>%
+  group_by(GEOID, CODE3) %>%
+  summarize(SumS000 = sum(S000)) %>% ungroup()
+workside_wide_full <- blockseq %>%
+  left_join(workside_wide)%>%
+  complete(GEOID,CODE3) %>%
+  arrange(CODE3) %>%
+  pivot_wider(names_from = CODE3, values_from = SumS000, values_fn = sum, names_glue = "{CODE3}_w") %>%
+  na_replace(0)
+workside_wide_ttl <- workside_wide_full %>% as.tibble() %>%
+  bind_rows(summarise(.,
+                      across(where(is.numeric), sum),
+                      across(where(is.factor), ~"colSUM"))) %>%
+  slice(n(),1:(n()-1)) %>%
+  mutate(TTL_w = rowSums(.[2:99])) %>% 
+  select(-XXX_w)
+
+results_at_blockgroups <- left_join(homeside_wide_ttl, workside_wide_ttl)
+
+
+#double check columns (why are some 0 here but not in Bills?) (CMT...)
+#run through python script
+```
+
+
+
+
+
+
 
 #### citytownshipdata.json
 ```{r}
 #city township totals
-h_citytownship <- homeside %>%
+h_citytownship <- homeside_wfrc %>%
   group_by(CODE3,SHORTDESC) %>%
-  summarize(people_x = sum(S000))
-w_citytownship <- workside %>%
+  summarize(people_h = sum(S000))
+w_citytownship <- workside_wfrc %>%
   group_by(CODE3,SHORTDESC) %>%
-  summarize(people_y = sum(S000))
+  summarize(people_w = sum(S000))
 citytownship18 <- left_join(h_citytownship, w_citytownship) %>%
   rename('label' = SHORTDESC, 'value' = CODE3) %>%
   select(2,1,3,4) %>%
-  filter(value != "XXX")
+  filter(value != "XXX") %>%
+  na_replace(0)
 ```
 
 ```{r}
@@ -128,69 +229,73 @@ ctgeo <- citytownship18 %>%
 ```
 
 ```{r}
-mapview(ctgeo, zcol = "people_x")
+mapview(ctgeo, zcol = "people_h")
 ```
 
 ```{r}
-mapview(ctgeo, zcol = "people_y")
+mapview(ctgeo, zcol = "people_w")
 ```
 
 ```{r}
 ctjson <- toJSON(citytownship18, pretty=TRUE) %>%
-  write("citytownshipdata19.json")
+  write("citytownshipdata18.json")
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #### City CommutePatterns
-```{r}
-homeside_wide <- homeside %>% filter(CODE3 %in% wfrc_towns) %>%
-  arrange(CODE3) %>%
-  select(-SHORTDESC, -h_geocode) %>%
-  pivot_wider(names_from = CODE3, values_from = S000, values_fn = sum, names_glue = "{CODE3}_x") %>%
-  na_replace(0)
-homeside_wide_ttl <- homeside_wide %>%
-  mutate(TTL_x = rowSums(.[2:93]))
-write_csv(homeside_wide_ttl, "test.csv")
-
-workside_wide <- workside %>% filter(CODE3 %in% wfrc_towns) %>%
-  arrange(CODE3) %>%
-  select(-SHORTDESC, -w_geocode) %>%
-  pivot_wider(names_from = CODE3, values_from = S000, values_fn = sum, names_glue = "{CODE3}_y") %>%
-  na_replace(0)
-```
 
 ```{r}
-city_x <- homeside %>% 
-  filter(CODE3 %in% wfrc_towns) %>%
-  select(-SHORTDESC) %>%
+fullseq <-  homeside_wfrc %>% expand(CODE3, full_seq = (c(wfrc_towns,"XXX"))) %>%
+  rename("CODE3_1" = "full_seq", "CODE3_2" = "CODE3") %>%
+  expand(CODE3_1, CODE3_2 = c(wfrc_towns, "XXX"))
+city <- homeside_wfrc %>%
   rename("CODE3_h" = "CODE3") %>%
   mutate(w_geocode = as.double(w_geocode)) %>%
   left_join(blockcity_wfrc, by = c("w_geocode" = "GEOID10")) %>%
-  rename("CODE3_w" = "CODE3") %>%
+  rename("CODE3_w" = "CODE3", "SHORTDESC_h" = 'SHORTDESC.x', "SHORTDESC_w" = "SHORTDESC.y") %>%
   select(-w_geocode,-h_geocode) %>% ungroup() %>%
-  group_by(CODE3_h, CODE3_w, SHORTDESC) %>%
-  summarize(SumS000 = sum(S000))
+  group_by(CODE3_h, CODE3_w) %>%
+  summarize(SumS000 = sum(S000)) %>% ungroup()
 
-city_x_wide <- city_x %>%
+cityfullh <- fullseq %>%
+  left_join(city, by = c("CODE3_1" = "CODE3_h", "CODE3_2" = "CODE3_w")) %>%
+  na_replace(0) %>% 
+  rename("CODE3_h" = "CODE3_1",  "CODE3"="CODE3_2")
+
+cityfullw<- fullseq %>%
+  left_join(city, by = c("CODE3_1" = "CODE3_w", "CODE3_2" = "CODE3_h")) %>%
+  na_replace(0) %>%
+  rename("CODE3_w" = "CODE3_1",  "CODE3"="CODE3_2")
+
+city_h <- cityfullh %>%
   arrange(CODE3_h) %>%
-  select(-SHORTDESC, -h_geocode) %>%
-  pivot_wider(names_from = CODE3, values_from = S000, values_fn = sum, names_glue = "{CODE3}_x") %>%
+  pivot_wider(names_from = CODE3_h, values_from = SumS000,values_fn = sum,names_glue = "{CODE3_h}_h") %>%
+  arrange(CODE3) %>%
+  na_replace(0)
+city_w <- cityfullw %>%
+  arrange(CODE3_w) %>%
+  pivot_wider(names_from = CODE3_w, values_from = SumS000,values_fn = sum,names_glue = "{CODE3_w}_w") %>%
+  arrange(CODE3) %>%
   na_replace(0)
 
-city_y <- workside %>%
-  filter(CODE3 %in% wfrc_towns) %>%
-  select(-SHORTDESC) %>%
-  rename("CODE3_w" = "CODE3") %>%
-  mutate(h_geocode = as.double(h_geocode)) %>%
-  left_join(blockcity_wfrc, by = c("h_geocode" = "GEOID10")) %>%
-  rename("CODE3_h" = "CODE3") %>%
-  select(-w_geocode,-h_geocode) %>% ungroup() %>%
-  group_by(CODE3_w, CODE3_h, SHORTDESC) %>%
-  summarize(SumS000 = sum(S000))
-  
-
-left_join(lehd_raw,blockcity_raw, by = c("w_geocode" = "GEOID10"))
+City_CommutePatterns_Number <- left_join(city_h,city_w) %>%
+  left_join()
 ```
-
 
 
 
