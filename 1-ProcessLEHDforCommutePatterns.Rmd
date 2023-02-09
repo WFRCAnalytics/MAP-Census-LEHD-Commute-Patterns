@@ -20,7 +20,7 @@ library(imputeTS)
 
 ## Select Year of Analysis
 ```{r}
-year = '2018'
+year = '2019'
 ```
 
 
@@ -170,7 +170,7 @@ results_at_blockgroups <- home_work_ttl %>%
   mutate(fakeid = row_number() - 1) %>%
   select(198,1:197) %>%
   #adjust for UofU bad allocation
-  subset(GEOID !=  "490351108004") %>%
+  subset(GEOID !=  "490351108004") %>% # DOUBLE CHECK IF THIS IS NEEDED
   bind_rows(uofu_adj) %>%
   arrange(fakeid) %>%
 bind_rows(summarise(.,
