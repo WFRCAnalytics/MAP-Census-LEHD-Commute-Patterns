@@ -164,14 +164,106 @@ workside_wide_ttl <- workside_wide_full %>% as.tibble() %>%
 home_work_ttl <- left_join(homeside_wide_ttl, workside_wide_ttl)
 ```
 
+
+## Fix Misplaced College Jobs
+In the 2018 data, there was about 20,000 additional educational jobs in block group 490351108004001. In addition, the block groups corresponding to UofU campus had about 18,000+ too few educational jobs. These additional educational jobs were moved from block group 490351108004001 to the UofU block groups as a guess to fix the data's inconsistency. For 2019, we will double check these block groups and fix the mistake if needed. 
+
+Steps to follow:
+  - Read in the "C" LEHD LODES dataset to determine the top five 5 block groups with educational jobs
+  - Double check if these locations make sense and which colleges they correspond to
+  - Match these up with the "S" LEHD LODES dataset 
+  - Determine if somewhere is mixed up
+  
+First we read in the blockgroup shapefile spatial dataframe. 
 ```{r}
-# calculate a fakeid, adjust for the UofU bad allocation, and calculate a column sum after adjusting for UofU allocation
-results_at_blockgroups <- home_work_ttl %>%
+blockcity2 <- blockcity %>% as.tibble() %>% select(-geometry)
+blockgroups <- st_read("data/data2019/tl_2020_49_bg/tl_2020_49_bg.shp") %>%
+  as_tibble() %>%
+  left_join(blockcity2) %>%
+  select(GEOID,GEOID10,geometry)
+geoid <- blockgroups %>% select(-GEOID10) %>%
+  unique()
+```
+
+We also read in the college shapefile to compare with the LDOES data.
+```{r}
+slTazPolygon <- st_read("A:/1 - TDM/1 - Input Dev/0 - GlobalData/0 - TripTables/1 - College Base Year Enrollment Distribution/data/StreetLight_TAZ_2021_09_22/StreetLight_TAZ_2021_09_22.shp") %>%
+  filter(SUBAREAID == 1) %>%
+  select(SA_TAZID,SL_COTAZID) %>%
+  st_set_crs(26912)
+
+collegePolygon <- read_csv("A:/1 - TDM/1 - Input Dev/0 - GlobalData/0 - TripTables/1 - College Base Year Enrollment Distribution/data/College_to_SL_COTAZID.csv") %>%
+  left_join(slTazPolygon) %>%
+  st_as_sf()
+```
+
+Next we read in the Workplace Area Characteristics (WAC) LODES data. This will tell us how many jobs exist within each GEOID10. We merge the block level data to get it at the block level. 
+```{r}
+utrac <- read_csv("data/data2019/ut_wac_S000_JT00_2019.csv") %>%
+  mutate(w_geocode = as.factor(w_geocode)) %>%
+  select(w_geocode,C000,CNS15) %>%
+  left_join(blockgroups, by = c("w_geocode" = "GEOID10")) %>%
+  group_by(GEOID) %>%
+  summarize(C000 = sum(C000),
+            CNS15 = sum(CNS15)) %>%
+  left_join(geoid) %>%
+  arrange(desc(CNS15)) %>%
+  st_as_sf()
+  
+head(utrac,8)
+```
+
+Below is a map comparing the location of blockgroups with more than 2000 educational jobs as well as the college locations. Notice how there is no block groups next to UofU! This means the data was not fixed for the 2019 LODES dataset, and we must reassign the educational employment in Holladay to the UofU area.
+
+```{r}
+utracC <- utrac %>% filter(CNS15 > 2000)
+mapview(utracC, col.regions = "red") +
+  mapview(collegePolygon)
+```
+
+
+
+```{r}
+UofU_hhjobsViewer <- data.frame(GEOID = c(490351014022, 490351014011, 490351014022, 490351014011, 490351108004, 490351108004),
+                               DESCRIP = c("UOFU", "UOFU_SOUTH", "UOFU", "UOFU_SOUTH", "HOLLADAY", "HOLLADAY"),
+                               SOURCE = c("TOT", "TOT", "EDU/OFF", "EDU/OFF", "TOT", "EDU/OFF"),
+                               HHJOB = c(41820, 4600, 38518, 4343, 1108, 771),
+                               LODES = c(14025, 1376, 44, 162, 22063, 21105)) %>%
+  mutate(Difference = abs(HHJOB - LODES))
+tibble(UofU_hhjobsViewer)
+```
+After analyzing the map, we created a table which compares the employment data of the LODES dataset with the employment data from the Household and Job Forecasts Viewer for 2019 (https://wfrc.org/household-job-forecast-map/). It looks like for the main block group corresponding to UofU campus, a total of 27795 jobs are missing -- most of them we assume to be educational jobs because currently the LODES data only has 44 of those jobs in that area! 
+
+Furthermore, we see that with block group 490351108004, the LODES data has 20955 too many jobs in that block group compared to the household and Jobs Forecast Viewer! And since the UofU block group is missing at 27795 overall jobs, we will make an assumption by moving 20955 jobs from block group 490351108004 to block group 490351014022 in the LODES data.
+
+This means we want to keep only 5.02% of jobs that currently exist in block group 490351108004. We also want to multiple the jobs within block group 490351014022 by 2.494 to get a total of 34,980 jobs in the UofU block group area (in other words to add the 20,955 jobs that we took away from the Holladay block group).
+
+Below we make the necessary adjustments by multiplying the two block groups by the ratio needed to correct for the UofU adjustment. Then, we "patch" these two block groups back into the processed dataset.
+
+```{r}
+uofu_adjust <- home_work_ttl %>%
+  filter(GEOID %in% c('490351014022','490351108004'))
+uofu_adjust[1,c(2:98)] <- uofu_adjust[1,c(2:98)]*2.6882 #2.494, had to increase due to rounding error
+uofu_adjust[2,c(2:98)] <- uofu_adjust[2,c(2:98)]*0.0534 #.0502, had to increase due to rounding error
+uofu_adjust[1,1] <- '490351014022'
+uofu_adjust[2,1] <- '490351108004'
+uofu_adjustr <- uofu_adjust %>%
+  mutate_if(is.numeric, round) %>%
+  mutate(TTL_h = rowSums(.[2:98]))
+
+home_work_ttl_fix <- home_work_ttl %>%
+  filter(!GEOID %in% c('490351014022','490351108004')) %>%
+  bind_rows(uofu_adjustr) %>%
+  arrange(GEOID)
+```
+
+## Combine Datasets
+
+```{r}
+# calculate a fakeid and calculate a column sum
+results_at_blockgroups <- home_work_ttl_fix %>%
   mutate(fakeid = row_number() - 1) %>%
   select(198,1:197) %>%
-  #adjust for UofU bad allocation
-  subset(GEOID !=  "490351108004") %>% # DOUBLE CHECK IF THIS IS NEEDED
-  bind_rows(uofu_adj) %>%
   arrange(fakeid) %>%
 bind_rows(summarise(.,
                     across(where(is.numeric), sum),
@@ -179,7 +271,6 @@ bind_rows(summarise(.,
   slice(n(),1:(n()-1)) %>%
   mutate(fakeid = ifelse(GEOID == "colSUM", 0,fakeid))
 ```
-
 
 ## Result
 ```{r}
