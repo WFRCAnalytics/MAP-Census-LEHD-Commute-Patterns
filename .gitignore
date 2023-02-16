@@ -3,4 +3,5 @@ _archive/inputs/REMMdata.zip
 .Rproj.user
 
 data/data2019/ut_od_main_JT00_2019.csv
+data/data2019/StreetLight/SL_HBW.csv
 data/data2018/andy/*
