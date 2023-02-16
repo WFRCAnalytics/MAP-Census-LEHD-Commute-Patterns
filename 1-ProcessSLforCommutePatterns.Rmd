@@ -221,9 +221,17 @@ bind_rows(summarise(.,
   mutate(fakeid = ifelse(GEOID == "colSUM", 0,fakeid))
 ```
 
+## Divide by 2
+Since we want to compare the SL data with the LODES dataset, we think it is appropriate to divide the trips by two. Logically, there are at least 2 HBW trips that occur for every one job location.
+
+```{r}
+sl_at_blockgroups2 <- sl_at_blockgroups %>%
+  mutate_if(is.numeric, funs(. / 2))
+```
+
 ```{r}
 #write output csv to be used in the python script which create the webapp inputs
-write_csv(sl_at_blockgroups, paste0("data/data",year,"/sl_at_blockgroup_level",year,".csv"))
+write_csv(sl_at_blockgroups2, paste0("data/data",year,"/sl_at_blockgroup_level",year,".csv"))
 ```
 
 

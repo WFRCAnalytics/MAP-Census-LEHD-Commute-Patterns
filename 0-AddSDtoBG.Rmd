@@ -78,3 +78,36 @@ mapview(bgsd)
 st_write(bgsd, paste0("data/data",year,"/tl_2020_49_bg/tl_2020_49_sd_bg.shp"))
 ```
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### TAZ
+```{r}
+bgtaz <- st_read("C:/Users/cday/Documents/projects/Census-Block-to-TAZ/3-results/CensusBlockTAZSplitsWithHouseholds.shp")
+```
+
+```{r}
+mapview(bgtaz) + 
+  mapview(bg, col.regions = "red")
+```
+
+
+
+
+
+
