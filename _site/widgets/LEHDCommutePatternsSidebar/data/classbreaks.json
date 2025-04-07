@@ -1,0 +1,132 @@
+[
+  {
+    "categoryCode": "live_who_work_in",
+    "number":
+      {
+        "units": " people",
+        "beginColor": "white",
+        "endColor": "darkblue",
+        "numClasses": 5,
+        "classMin0":    0,
+        "classMin1":   25,
+        "classMin2":  250,
+        "classMin3":  500,
+        "classMin4": 1000
+      },
+      "percent_sa":
+        {
+          "units": " percent of people",
+          "beginColor": "white",
+          "endColor": "darkgreen",
+          "numClasses": 5,
+          "classMin0":  0,
+          "classMin1":  1,
+          "classMin2":  2,
+          "classMin3":  5,
+          "classMin4": 10
+        },
+      "percent_mu":
+        {
+          "units": " percent of people",
+          "beginColor": "white",
+          "endColor": "darkturquoise",
+          "numClasses":  5,
+          "classMin0":   0,
+          "classMin1":   5,
+          "classMin2":  10,
+          "classMin3":  20,
+          "classMin4":  40
+        },
+      "num":
+        {
+          "units": " people",
+          "beginColor": "darkturquoise",
+          "endColor": "red",
+          "numClasses":  6,
+          "classMin0":  -10000,
+          "classMin1":  -1000,
+          "classMin2":  -100,
+          "classMin3":  100,
+          "classMin4":  1000,
+          "classMin5":  10000
+        },
+      "percent":
+        {
+          "units": " percent of people",
+          "beginColor": "darkturquoise",
+          "endColor": "red",
+          "numClasses":  6,
+          "classMin0":  -1000,
+          "classMin1":  -100,
+          "classMin2":  -10,
+          "classMin3":  10,
+          "classMin4":  100,
+          "classMin5":  1000
+        }
+  },
+  {
+    "categoryCode": "work_who_live_in",
+    "number": 
+      {
+        "units": " people",
+        "beginColor": "white",
+        "endColor": "darkorange",
+        "numClasses": 5,
+        "classMin0":    0,
+        "classMin1":   25,
+        "classMin2":  250,
+        "classMin3":  500,
+        "classMin4": 1000
+      },
+      "percent_sa":
+        {
+          "units": " percent of people",
+          "beginColor": "white",
+          "endColor": "darkred",
+          "numClasses": 5,
+          "classMin0":  0,
+          "classMin1":  1,
+          "classMin2":  2,
+          "classMin3":  5,
+          "classMin4": 10
+        },
+      "percent_mu":
+        {
+          "units": " percent of people",
+          "beginColor": "white",
+          "endColor": "darkviolet",
+          "numClasses":  5,
+          "classMin0":   0,
+          "classMin1":   5,
+          "classMin2":  10,
+          "classMin3":  20,
+          "classMin4":  40
+        },
+        "num":
+          {
+            "units": " people",
+            "beginColor": "darkturquoise",
+            "endColor": "red",
+            "numClasses":  6,
+            "classMin0":  -10000,
+            "classMin1":  -1000,
+            "classMin2":  -100,
+            "classMin3":  100,
+            "classMin4":  1000,
+            "classMin5":  10000
+          },
+        "percent":
+          {
+            "units": " percent of people",
+            "beginColor": "darkturquoise",
+            "endColor": "red",
+            "numClasses":  6,
+            "classMin0":  -1000,
+            "classMin1":  -100,
+            "classMin2":  -10,
+            "classMin3":  10,
+            "classMin4":  100,
+            "classMin5":  1000
+          }
+  }
+]

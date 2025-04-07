@@ -1,0 +1,442 @@
+
+
+.wide .dojoxCheckedMultiSelectWrapper {
+  width: 323px;
+}
+
+div.selectedWidget {
+    cursor: pointer;
+	color: #005fa2; /*sCTextOn*/
+	background-color: #90EE90; /*sCTabOn*/
+	padding: 5px;
+	padding-right: 1px;
+}
+  
+div.selectedWidget:hover {
+	color: #005fa2;;
+	background-color: lightblue;
+}
+  
+div.unselectedWidget {
+	cursor: pointer;
+	color: #ffffff; /*cCTextOff*/
+	background-color: #bbbbbb;  /*sCTabOff*/
+	padding: 5px;
+	padding-right: 1px;
+}
+  
+div.unselectedWidget:hover {
+	color: white;
+	background-color: lightblue;
+}
+div.selectedToggle {
+	cursor: pointer;
+	font-size: 100%;
+	color: #005fa2; /*sCTextOn*/
+	background-color: #90EE90; /*sCTabOn*/
+	padding: 5px;
+  }
+  
+  div.selectedToggle:hover {
+	color: #005fa2;;
+	background-color: lightblue;
+  }
+  
+  div.unselectedToggle {
+	cursor: pointer;
+	font-size: 100%;
+	color: #ffffff; /*cCTextOff*/
+	background-color: #bbbbbb;  /*sCTabOff*/
+	padding: 5px;
+  }
+  
+  div.unselectedToggle:hover {
+	color: white;
+	background-color: lightblue;
+  }
+  iv.toggleVolSelected {
+	cursor: pointer;
+	font-size: 80%;
+	color: #005fa2; /*sCTextOn*/
+	background-color: #90EE90; /*sCTabOn*/
+  }
+  
+  div.toggleVolSelected:hover {
+	color: #005fa2;;
+	background-color: lightblue;
+  }
+  
+  div.toggleVolUnselected {
+	cursor: pointer;
+	font-size: 80%;
+	color: #ffffff; /*cCTextOff*/
+	background-color: #bbbbbb;  /*sCTabOff*/
+  }
+  
+  div.toggleVolUnselected:hover {
+	color: white;
+	background-color: lightblue;
+  }
+  
+  div.tabcontrol {
+	position: relative;
+	left: 30px;
+	cursor: pointer;
+  }
+
+div.pictureLEHD {
+	width:25px; /*width of your image*/
+	height:25px; /*height of your image*/
+	background-image:url('../images/icon_forecast_blue.png');
+	margin:0; /* If you want no margin */
+	padding:0; /*if your want to padding */
+	/*display:inline;*/
+}
+  
+div.pictureSL {
+	width:25px; /*width of your image*/
+	height:25px; /*height of your image*/
+	background-image:url('../images/icon_change_white.png');
+	margin:0; /* If you want no margin */
+	padding:0; /*if your want to padding */
+	/*display:inline;*/
+}
+  
+div.pictureLEHDVSL {
+	width:25px; /*width of your image*/
+	height:25px; /*height of your image*/
+	background-image:url('../images/icon_vs_white.png');
+	margin:0; /* If you want no margin */
+	padding:0; /*if your want to padding */
+	/*display:inline;*/
+}
+
+p.normal {
+    font-weight: normal;
+}
+
+p.light {
+    font-weight: lighter;
+}
+
+p.thick {
+    font-weight: bold;
+}
+
+p.thicker {
+    font-weight: 900;
+	font-size: 120%;
+}
+
+div.fromcell {
+	font-weight: bold;
+	font-size: 110%;
+	background-color:rgba(229,102,102,0.3);
+	padding: 0.25em;
+	line-height:22px;
+}
+
+div.tocell {
+	font-weight: bold;
+	font-size: 110%;
+	background-color:rgba(102,102,229,0.3);
+	padding: 0.25em;
+	line-height:22px;
+}
+
+div.fromcell.label {
+	background-color:rgb(255,255,255);
+}
+
+div.tocell.label {
+	background-color:rgb(255,255,255);
+}
+
+table.settings {
+	//border: 1px solid black;
+	background-color: rgba(185,185,185,0.3);
+}
+
+.right {
+    position: right;
+}
+
+div.thicker {
+    font-weight: 700;
+	font-size: 110%;
+}
+
+div.qTableResults {
+	font-weight: normal;
+	text-align: right;
+	font-size: 110%;
+}
+
+div.qTableResults.Total {
+	font-weight: bold;
+}
+
+div.qTableResultsShare {
+	font-weight: normal;
+	text-align: right;
+	font-size: 110%;
+}
+
+div.qTableResultsShare.Total {
+	font-weight: normal;
+}
+
+div.qTableRowLabel{
+    font-weight: normal;
+	text-align: Left;
+	font-size: 110%;
+}
+
+div.qTableRowLabel.NonMotorized{
+	font-size: 105%;
+}
+
+div.qTableRowLabel.AllModes{
+	font-weight: bold;
+}
+
+div.qTableHeaderLabel{
+    font-weight: bold;
+	font-size: 105%;
+	text-decoration: underline;
+}
+	
+div.qTableYearRow{
+	font-weight: bold;
+	font-size: 110%;
+	text-align: center;
+	background-color:#dddddd;
+	padding:0.5em;
+}
+
+hr {
+    display: block;
+    height: 1px;
+    border: 0;
+    border-top: 1px solid #ccc;
+    margin: 1em 0;
+    padding: 0;
+}
+
+td.resultrow {
+	height:25px;	
+}
+
+td.resultrow .heading{
+	height:35px;	
+}
+
+td.resultrow.share {
+	width:60px;
+}
+
+td.resultrow.number {
+	width:100px;
+}
+
+td.resultrow.label {
+	width:105px;
+}
+
+tr.results_color {
+    background-color: #dddddd;
+}
+
+table.resultstable {
+	width: 100%;
+	border: none;
+	border-collapse:collapse;
+}
+
+//table.resultstable tr:nth-child(odd) td{
+//           background:#ccc;
+//}
+//table.resultstable tr:nth-child(even) td{
+//            background:#fff;
+//}
+
+br {
+   display: block;
+   margin: 15px 0;
+}
+
+div.scrollable {
+    border: 1px solid #999;
+    padding: 10px;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    bottom: 10px;
+    left: 10px;
+    overflow: auto;
+}
+
+
+/*Resize*/
+.dojoxResizeHandle {float: right; position: absolute; right: 2px; bottom: 2px; width: 13px; height: 13px; z-index: 20; background-image: url('icons/resize.png'); line-height: 0px;}.dijitRtl .dojoxResizeHandle {float: right; left: 0px; right: auto; background-image: url('icons/resizeRtl.png');}.dojoxResizeNW {cursor: nw-resize;}.dijitRtl .dojoxResizeNW {cursor: ne-resize;}.dojoxResizeNE {cursor: ne-resize;}.dijitRtl .dojoxResizeNE {cursor: nw-resize;}.dojoxResizeW {cursor: w-resize;}.dojoxResizeN {cursor: n-resize;}.dojoxResizeHandleClone {position:absolute; top:0; left:0; border:1px dashed #666; z-index:999;}
+
+
+/*Floating Pane*/
+.dojoxFloatingPane {
+	background-color:#fff;
+	position:relative;
+	border: 1px solid #dedede;
+	overflow: hidden;
+	-webkit-box-shadow: 0px 5px 10px #adadad;
+}
+.dojoxFloatingPaneFg {
+	-webkit-box-shadow: 0px 8px 20px #525252;
+}
+.dojoxFloatingPaneTitle {
+	background: #cccccc;
+	background:#fafafa repeat-x bottom left;
+	border:1px solid #bfbfbf;
+	padding:4px 4px 2px 4px;
+	cursor: pointer;
+	white-space: nowrap;
+}
+.soria .dojoxFloatingPaneTitle {
+	background:#fff url("../images/titleBar.png") repeat-x top left;
+	border:1px solid #b1badf;
+	font-size: 0.9em;
+	font-weight: bold;
+	line-height:1.2em;
+}
+.tundra .dojoxFloatingPaneTitle {
+	background:#fafafa url("../images/titleBarBg.gif") repeat-x bottom left;
+	border:1px solid #bfbfbf;
+	color:#000;
+}
+.dojoxFloatingCloseIcon {
+	background:url('../images/tabClose.png') no-repeat center center;
+	width:16px;
+	height:16px;
+	overflow:hidden;
+	float:right;
+}
+.dojoxFloatingMinimizeIcon {
+	background:url('../images/spriteArrows.png') no-repeat 0px center;
+	width:7px;
+	margin: 0px 4px;
+	overflow:hidden;
+	float:right;
+}
+.soria .dojoxFloatingMinimizeIcon {
+	background:url("../images/spriteRoundedIconsSmallBl.png") no-repeat -15px top;
+	width: 14px;
+	margin: 0px 2px;
+}
+.floatingPaneMaximized .dojoxFloatingMaximizeIcon {
+	display:none;
+}
+.dojoxFloatingMaximizeIcon {
+	background:url('../images/spriteArrows.png') no-repeat -21px center;
+	width:7px;
+	margin: 0px 4px;
+	overflow:hidden;
+	float:right;
+}
+.soria .dojoxFloatingMaximizeIcon {
+	background:url("../images/spriteRoundedIconsSmallBl.png") no-repeat -45px top;
+}
+.floatingPaneMaximized .dojoxFloatingRestoreIcon {
+	display:inline;
+}
+.dojoxFloatingRestoreIcon {
+	background:url('../images/spriteArrows.png') no-repeat 0px center;
+	width:7px;
+	margin: 0px 4px;
+	float:right;
+	display:none;
+}
+.dojoxFloatingResizeHandle {
+	background:url('icons/resize.png') no-repeat bottom right;
+	position:absolute;
+	right:0;
+	bottom:0;
+	width:16px;
+	height:16px;
+	cursor:nw-resize;
+}
+.dojoxFloatingCloseIcon {
+	width:15px;
+	height:15px;
+	overflow:hidden;
+	float:right;
+	cursor:pointer;
+}
+.soria .dojoxFloatingCloseIcon {
+	background:url("../images/spriteRoundedIconsSmallBl.png") no-repeat -60px top;
+}
+.tundra .dojoxFloatingCloseIcon {
+	background:url('../images/tabClose.png') no-repeat center center;
+}
+.dojoxFloatingDockDefault {
+	position:absolute;
+	bottom:0px;
+	left:0px;
+	overflow:hidden;
+	margin:0;
+	margin-bottom:3px;
+	padding:0px;
+	width:100%;
+	z-index:99;
+	background:transparent;
+}
+.dojoxDockList {
+	padding: 0px;
+	margin: 0px;
+}
+.dojoxDockRestoreButton {
+	background:url('../images/folderClosed.gif') no-repeat center center;
+	width:16px;
+	height:16px;
+	overflow:hidden;
+	float:left;
+	margin-top:2px;
+}
+.soria .dojoxDockRestoreButton {
+	background:url("../images/spriteRoundedIconsSmallBl.png") no-repeat -45px top;
+}
+.dojoxDockTitleNode {
+	overflow:hidden;
+}
+.dojoxDock {
+	display: block;
+	border: 1px solid black;
+	position: absolute;
+	padding:0;
+	margin:0;
+	background:#fcfcfc;
+}
+.dojoxDockNode {
+	border: 1px solid #adadad;
+	border-radius: 2px;
+	-webkit-border-radius: 2px;
+	-moz-border-radius: 3px;
+	cursor:pointer;
+	list-style: none;
+	padding: 2px;
+	margin: 0px;
+	height: 16px;
+	width: auto;
+	float: left;
+	background: #fafafa url("../images/titleBarBg.gif") repeat-x bottom left;
+}
+.soria .dojoxDockNode {
+	background:#b7cdee url("../images/titleBar.png") repeat-x;
+}
+.dojoxFloatingPaneContent {
+	overflow: auto;
+	background-color: #fff;
+	height: 100%;
+	width: 100%;
+}
+.dojoxFloatingPaneCanvas {
+	background-color:#fff;
+}
