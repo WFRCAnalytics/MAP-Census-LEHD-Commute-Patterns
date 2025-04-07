@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?><metadata>
+    <idinfo>
+        <citation>
+            <citeinfo>
+                <title>CensusTracts2020</title>
+                <geoform>vector digital data</geoform>
+            </citeinfo>
+        </citation>
+        <descript>
+            <abstract>Last Update: 02/2021This datasets was was downloaded from the 2020 Census Redistricting Data (P.L. 94-171) page. All 2020 census boundaries are current to January 1, 2020. The Census Bureau will release the first set of corresponding demographic data in September 2021 (the 2020 Census Redistricting P.L. 94-171 Summary Files). Following that release, AGRC will append the demographic data to the existing 2020 geographies served on this page.Census tracts are small, relatively permanent subdivisions of a county designed to present and compare statistical data for areas of roughly equal population. Census tracts generally contain between 1,200 and 8,000 people, with an optimum population of 4,000. A census tract is spatially smaller in a higher-density area and larger in a more sparsely populated area. In higher-density areas, tracts can be considered approximately “neighborhood” sized.Visit the SGID 2020 Census data pagefor more information.</abstract>
+            <purpose>This datasets was was downloaded from the 2020 Census Redistricting Data (P.L. 94-171) page. All 2020 census boundaries are current to January 1, 2020.  The Census Bureau will release the first set of corresponding demographic data in September 2021 (the 2020 Census Redistricting P.L. 94-171 Summary Files). Following that release, AGRC will append the demographic data to the existing 2020 geographies served on this page.</purpose>
+        </descript>
+        <spdom>
+            <bounding>
+                <westbc>-114.052885</westbc>
+                <eastbc>-109.041572</eastbc>
+                <northbc>42.001702</northbc>
+                <southbc>36.997657</southbc>
+            </bounding>
+        </spdom>
+        <keywords>
+            <theme>
+                <themekt>None</themekt>
+                <themekey>Boundaries</themekey>
+                <themekey>Society</themekey>
+                <themekey>Demographic</themekey>
+                <themekey>Population</themekey>
+                <themekey>SGID</themekey>
+                <themekey>AGRC</themekey>
+            </theme>
+        </keywords>
+        <accconst>None</accconst>
+        <useconst>The data, including but not limited to geographic data, tabular data, and analytical data, are provided “as is” and “as available”, with no guarantees relating to the availability, completeness, or accuracy of data, and without any express or implied warranties.These data are provided as a public service for informational purposes only. You are solely responsible for obtaining the proper evaluation of a location and associated data by a qualified professional. AGRC reserves the right to change, revise, suspend or discontinue published data and services without notice at any time.Neither AGRC nor the State of Utah are responsible for any misuse or misrepresentation of the data. AGRC and the State of Utah are not obligated to provide you with any maintenance or support. The user assumes the entire risk as to the quality and performance of the data. You agree to hold the State of Utah harmless for any claims, liability, costs, and damages relating to your use of the data. You agree that your sole remedy for any dissatisfaction or claims is to discontinue use of the data.</useconst>
+        <datacred>U.S. Census Bureau</datacred>
+        <native> Version 6.2 (Build 9200) ; Esri ArcGIS 10.7.1.11595</native>
+    </idinfo>
+    <spdoinfo>
+        <direct>Vector</direct>
+        <ptvctinf>
+            <sdtsterm>
+                <sdtstype>GT-polygon composed of chains</sdtstype>
+                <ptvctcnt>0</ptvctcnt>
+            </sdtsterm>
+        </ptvctinf>
+    </spdoinfo>
+    <eainfo>
+        <detailed>
+            <enttyp>
+                <enttypl>CensusTracts2020</enttypl>
+            </enttyp>
+            <attr>
+                <attrlabl>OBJECTID</attrlabl>
+                <attrdef>Internal feature number.</attrdef>
+                <attrdefs>Esri</attrdefs>
+                <attrdomv>
+                                        
+                    
+                    <udom>Sequential unique whole numbers that are automatically generated.</udom>
+                                        
+                
+                </attrdomv>
+            </attr>
+            <attr>
+                <attrlabl>Shape</attrlabl>
+                <attrdef>Feature geometry.</attrdef>
+                <attrdefs>Esri</attrdefs>
+                <attrdomv>
+                                        
+                    
+                    <udom>Coordinates defining the features.</udom>
+                                        
+                
+                </attrdomv>
+            </attr>
+            <attr>
+                <attrlabl>STATEFP20</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>COUNTYFP20</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>TRACTCE20</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>GEOID20</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>NAME20</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>NAMELSAD20</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>MTFCC20</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>FUNCSTAT20</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>ALAND20</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>AWATER20</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>INTPTLAT20</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>INTPTLON20</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>Shape.STArea()</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>Shape.STLength()</attrlabl>
+            </attr>
+        </detailed>
+    </eainfo>
+    <metainfo>
+        <metd>20210224</metd>
+        <metstdn>FGDC Content Standard for Digital Geospatial Metadata</metstdn>
+        <metstdv>FGDC-STD-001-1998</metstdv>
+        <mettc>local time</mettc>
+    </metainfo>
+</metadata>

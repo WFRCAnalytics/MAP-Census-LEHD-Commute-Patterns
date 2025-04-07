@@ -1,0 +1,237 @@
+---
+title: "Process LEHD for Commute Patterns"
+author: "Chris Day"
+date: "2023-02-15"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+```{r}
+library(tidyverse)
+library(foreign)
+library(sf)
+library(jsonlite)
+library(mapview)
+library(imputeTS)
+library(purrr)
+```
+
+## Functions
+```{r}
+intersect_pct <-function(shape1,shape2){
+  int <- st_intersection(shape1, shape2) %>% 
+    mutate(intersect_area = st_area(.)) %>%   # create new column with shape area
+    dplyr::select(SL_COTAZID,GEOID, intersect_area) %>%   # only select columns needed to merge
+    st_drop_geometry()  # drop geometry as we don't need it
+  
+  # Create a fresh area variable for counties
+  shape1.1 <- mutate(shape1, shape_area = st_area(shape1))
+
+  # Merge by county name
+  shape1.1 <- merge(shape1.1, int, by = "SL_COTAZID", all.x = TRUE)
+
+  # Calculate coverage
+  shape1.1 <- shape1.1 %>% 
+   mutate(coverage = as.numeric(intersect_area/shape_area))
+  
+  shape1.1 %>%
+    select(SL_COTAZID,GEOID,intersect_area,coverage)
+} 
+```
+
+## StreetLight Data
+```{r}
+sl_hbw <- read_csv("data/data2019/StreetLight/SL_HBW.csv")
+sltaz <- st_read("data/data2019/StreetLight/StreetLight_TAZ_2021_09_22/StreetLight_TAZ_2021_09_22.shp") %>%
+  st_transform(26912)
+bg <- st_read(paste0("data/data",year,"/tl_2020_49_bg/tl_2020_49_bg.shp")) %>%
+  st_transform(26912) 
+```
+
+## City/Township Data
+```{r}
+#read in township codes and adjust the shortdesc to make merging easier later on
+township_codes <- read_csv("data/data2019/citytownship.csv") %>%
+  select(1,2) %>%
+  mutate(SHORTDESC = case_when(
+    CODE3 == "EMT" ~ "Emigration Canyon",
+    CODE3 == "CMT" ~ "Copperton",
+    CODE3 == "KMT" ~ "Kearns",
+    CODE3 == "MMT" ~ "Magna",
+    CODE3 == "WHT" ~ "White City",
+    TRUE ~ SHORTDESC
+  ))
+```
+
+```{r}
+# a list of all the city/townships in the wfrc areas
+wfrc_towns <- c("AFK","ALA","ALP","BDL","BGM","BNT","BRT","CDF","CEN","CHA","CHL","CLF","CLI","CMT","COA","CWH","DAN","DRA","EAG","ELK","EMT","FAR","FCS","FFD","FRR","FTH","GLA","GOS","GRL","HAR","HDT","HDT","HEB","HER","HGH","HNF","HOL","HOO","HVL","IND","INT","KAY","KMS","KMT","LAY","LEH","LIN","MAP","MID","MLC","MMT","MRG","MSL","MUR","MWY","NOG","NSL","OGD","OKL","ORM","PAY","PGR","PLN","PRK","PRY","PVO","PVW","ROY","RVD","RVT","SAN","SAQ","SAR","SFK","SJC","SLC","SLM","SOG","SPV","SSL","SUN","SWE","SYR","TAY","TOO","UIN","VIN","WAT","WBG","WDL","WEB","WHT","WHV","WIL","WJC","WPT","WVC","WXC")
+```
+
+## Geographic Data
+```{r}
+# block level coordinates
+blockcity <- read.dbf("data/data2019/blockcentersWBlockGroup.dbf") %>%
+  select(GEOID, GEOID10,x,y) %>% st_as_sf(coords = c("x","y"), crs = 4326) %>%
+  st_transform(crs = 4326) %>%   
+  st_as_sf() %>%
+  st_transform(26912) 
+# township shapefile
+sf_townships <- st_read("data/data2019/Municipalities_Township/Municipalities_Township.shp") %>%
+  st_transform(crs = 4326) %>%   
+  st_as_sf() %>%
+  st_transform(26912)
+#get the city at each block gorups
+blockpoint_city <- st_join(blockcity, sf_townships, join = st_within)
+```
+
+## Streetlight Data Pre-Processing
+```{r}
+#mapview(sltaz %>% filter(SL_COTAZID == "1002_0"), col.regions="red") + 
+#  mapview(bg)
+```
+
+```{r}
+sltazbg <- intersect_pct(sltaz,bg)
+sltaz_nestbg <- sltazbg %>%
+  as_tibble() %>%
+  select(SL_COTAZID,GEOID) %>%
+  nest(GEOID)
+sltaz_nestbgp <- sltazbg %>%
+  as_tibble() %>%
+  select(SL_COTAZID,coverage) %>%
+  nest(coverage)
+
+sltazbgj <- sltazbg %>%
+  as_tibble() %>%
+  select(-geometry,-intersect_area)
+```
+
+```{r}
+sl_hbw_1 <- sl_hbw %>%
+  left_join(sltaz_nestbg, by = c("origin_zone_name" = "SL_COTAZID")) %>%
+  unnest() %>%
+  rename("origin_zone_bg" = "GEOID") %>%
+  left_join(sltazbgj, by = c("origin_zone_name" = "SL_COTAZID","origin_zone_bg" = "GEOID")) %>%
+  rename("origin_zone_cov" = "coverage")
+sl_hbw_2 <- sl_hbw_1 %>%
+  left_join(sltaz_nestbg, by = c("destination_zone_name" = "SL_COTAZID")) %>%
+  unnest() %>%
+  rename("destination_zone_bg" = "GEOID") %>%
+  left_join(sltazbgj, by = c("destination_zone_name" = "SL_COTAZID","destination_zone_bg" = "GEOID")) %>%
+  rename("destination_zone_cov" = "coverage")
+```
+
+```{r}
+sl_hbw_bg <- sl_hbw_2 %>%
+  mutate(hbw_traffic_calibrated_trip_volume = o_d_traffic_calibrated_trip_volume * purpose_hbw_percent) %>%
+  mutate(hbw_trip = hbw_traffic_calibrated_trip_volume * origin_zone_cov * destination_zone_cov)
+
+sl_hbw_test <- sl_hbw_bg %>%
+  group_by(origin_zone_name,destination_zone_name,hbw_traffic_calibrated_trip_volume) %>%
+  summarize(test_hbw_vol = sum(hbw_trip))
+```
+
+```{r}
+sl_hbw_sum <- sl_hbw_bg %>%
+  select(origin_zone_bg,destination_zone_bg,hbw_trip) %>%
+  group_by(origin_zone_bg,destination_zone_bg) %>%
+  summarize(hbw_trips = sum(hbw_trip))
+```
+
+
+Now that we have a dataset of all the streetlight trips from one block group to another, we can summarize it similarly to how we summarized the LODES data, and determine the number of origins and destinations occurring within each city!
+
+## Streetlight Data Summarized at the Blockgroup/City Level
+```{r}
+blockgroup_city <- blockpoint_city %>%
+  as_tibble() %>%
+  select(GEOID,SHORTDESC) %>%
+  mutate(GEOID = as.character(GEOID)) %>%
+  unique() %>%
+  left_join(township_codes, by = c("SHORTDESC" = "SHORTDESC")) %>% 
+  mutate(CODE3 = ifelse(CODE3 %in% wfrc_towns, CODE3, "XXX"),
+         SHORTDESC = ifelse(CODE3 %in% wfrc_towns, SHORTDESC, "Outside WFRC Area"))
+```
+
+```{r}
+oside_wfrc <- left_join(sl_hbw_sum,blockgroup_city, by = c("origin_zone_bg" = "GEOID")) %>%
+  rename("o_geocode" = "origin_zone_bg", "d_geocode" = "destination_zone_bg")
+dside_wfrc <- left_join(sl_hbw_sum,blockgroup_city, by = c("destination_zone_bg" = "GEOID")) %>%
+  rename("o_geocode" = "origin_zone_bg", "d_geocode" = "destination_zone_bg")
+
+```
+
+```{r}
+oside_wide <- oside_wfrc %>%
+  select(-SHORTDESC, -o_geocode) %>%
+  group_by(d_geocode, CODE3) %>%
+  summarize(SumHBW = sum(hbw_trips)) %>% 
+  ungroup() %>%
+  rename("GEOID" = "d_geocode")
+oside_wide_full <- blockseq %>%
+  left_join(oside_wide)%>%
+  complete(GEOID,CODE3) %>%
+  arrange(CODE3) %>%
+  pivot_wider(names_from = CODE3, values_from = SumHBW, values_fn = sum, names_glue = "{CODE3}_o") %>%
+  na_replace(0)
+oside_wide_ttl <- oside_wide_full %>% as.tibble() %>%
+  mutate(TTL_o = rowSums(.[2:99])) %>%
+  select(-XXX_o)
+```
+
+```{r}
+dside_wide <- dside_wfrc %>%
+  select(-SHORTDESC, -d_geocode) %>%
+  group_by(o_geocode, CODE3) %>%
+  summarize(SumHBW = sum(hbw_trips)) %>% 
+  ungroup() %>%
+  rename("GEOID" = "o_geocode")
+dside_wide_full <- blockseq %>%
+  left_join(dside_wide)%>%
+  complete(GEOID,CODE3) %>%
+  arrange(CODE3) %>%
+  pivot_wider(names_from = CODE3, values_from = SumHBW, values_fn = sum, names_glue = "{CODE3}_d") %>%
+  na_replace(0)
+dside_wide_ttl <- dside_wide_full %>% as.tibble() %>%
+  mutate(TTL_d = rowSums(.[2:99])) %>% 
+  select(-XXX_d)
+```
+
+
+```{r}
+# merge home and work based data into single dataframe
+o_d_ttl <- left_join(oside_wide_ttl, dside_wide_ttl)
+```
+
+```{r}
+# calculate a fakeid and calculate a column sum
+sl_at_blockgroups <- o_d_ttl %>%
+  arrange(GEOID) %>%
+  mutate(fakeid = row_number() - 1) %>%
+  select(198,1:197) %>%
+  arrange(fakeid) %>%
+bind_rows(summarise(.,
+                    across(where(is.numeric), sum),
+                    across(where(is.character), ~"colSUM"))) %>%
+  slice(n(),1:(n()-1)) %>%
+  mutate(fakeid = ifelse(GEOID == "colSUM", 0,fakeid))
+```
+
+## Divide by 2
+Since we want to compare the SL data with the LODES dataset, we think it is appropriate to divide the trips by two. Logically, there are at least 2 HBW trips that occur for every one job location.
+
+```{r}
+sl_at_blockgroups2 <- sl_at_blockgroups %>%
+  mutate_if(is.numeric, funs(. / 2))
+```
+
+```{r}
+#write output csv to be used in the python script which create the webapp inputs
+write_csv(sl_at_blockgroups2, paste0("data/data",year,"/sl_at_blockgroup_level",year,".csv"))
+```
+
+

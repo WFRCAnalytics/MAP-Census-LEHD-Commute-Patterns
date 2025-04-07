@@ -1,0 +1,113 @@
+---
+title: "Add Small District ID to Block Groups"
+author: "Chris Day"
+date: "2023-02-08"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(sf)
+library(mapview)
+```
+
+## Select Year
+```{r}
+year = '2018'
+```
+
+
+## Inputs
+```{r}
+#block groups
+bg <- st_read(paste0("data/data",year,"/tl_2020_49_bg/tl_2020_49_bg.shp")) %>%
+  st_transform(26912) 
+#block group centroids
+bgc <- bg %>% st_centroid()
+
+#geoid geography
+geo <- bg %>% select(GEOID)
+
+#small districts
+sd <- st_read(paste0("data/data",year,"/Dist_Small/Dist_Small_Extra.shp")) 
+#small district centroids
+sdc <- sd %>% st_centroid()
+```
+
+## Add State and County Fips to Small District Geography
+```{r}
+#counties
+counties <- st_read(paste0("data/data",year,"/Utah_County_Boundaries-shp/Counties.shp")) %>%
+  mutate(STATEFP20 = '49', 
+         COUNTYFP20 = ifelse(nchar(FIPS) == 1, paste0("00",FIPS),paste0("0",FIPS))) %>%
+  select(STATEFP20,COUNTYFP20) %>%
+  st_transform(26912) 
+
+#join county/state data to small districts
+sdco <- st_join(sdc, counties, join = st_within) %>%
+  as_tibble() %>%
+  select(-geometry) %>%
+  left_join(sd) %>%
+  st_as_sf()
+
+st_write(sdco, paste0("data/data",year,"/Dist_Small/Dist_Small_Counties.shp"))
+```
+
+## View Map
+```{r}
+mapview(sdco) +
+  mapview(bgc)
+```
+
+## Join Small District Data to Block Groups
+```{r}
+bgsd <- st_join(bgc, sd, join = st_within) %>%
+  select(1:3,16,17,4:18) %>%
+  select(-5) %>%
+  as_tibble() %>%
+  select(-geometry) %>%
+  left_join(geo) %>%
+  st_as_sf()
+```
+
+```{r}
+mapview(bgsd)
+```
+
+```{r}
+st_write(bgsd, paste0("data/data",year,"/tl_2020_49_bg/tl_2020_49_sd_bg.shp"))
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### TAZ
+```{r}
+bgtaz <- st_read("C:/Users/cday/Documents/projects/Census-Block-to-TAZ/3-results/CensusBlockTAZSplitsWithHouseholds.shp")
+```
+
+```{r}
+mapview(bgtaz) + 
+  mapview(bg, col.regions = "red")
+```
+
+
+
+
+
+
