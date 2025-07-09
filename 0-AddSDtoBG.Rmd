@@ -1,5 +1,5 @@
 ---
-title: "Add Small District ID to Block Groups"
+title: "Add District to Block Groups"
 author: "Chris Day"
 date: "2023-02-08"
 output: html_document
@@ -9,35 +9,47 @@ output: html_document
 library(tidyverse)
 library(sf)
 library(mapview)
+library(jsonlite)
 ```
 
 ## Select Year
 ```{r}
-year = '2018'
+config <- fromJSON("config.json")
+config_year <- config$year
+config_bg_year <- config$bg_year
 ```
 
 
 ## Inputs
 ```{r}
 #block groups
-bg <- st_read(paste0("data/data",year,"/tl_2020_49_bg/tl_2020_49_bg.shp")) %>%
+bg <- st_read(paste0("data/data",config_year,"/tl_",config_bg_year,"_49_bg/tl_",config_bg_year,"_49_bg.shp")) %>%
   st_transform(26912) 
-#block group centroids
 bgc <- bg %>% st_centroid()
 
 #geoid geography
 geo <- bg %>% select(GEOID)
 
 #small districts
-sd <- st_read(paste0("data/data",year,"/Dist_Small/Dist_Small_Extra.shp")) 
-#small district centroids
+sd <- st_read(paste0("data/data",config_year,"/Dist_Small/Dist_Small.shp")) 
 sdc <- sd %>% st_centroid()
+
+#medium districts
+md <- st_read(paste0("data/data",config_year,"/Dist_Medium/Dist_Medium.shp")) 
+mdc <- md %>% st_centroid()
+
+#large districts
+ld <- st_read(paste0("data/data",config_year,"/Dist_Large/Dist_Large.shp")) 
+ldc <- ld %>% st_centroid()
+
+#counties
+counties_shp <- st_read(paste0("data/data",config_year,"/Utah_County_Boundaries-shp/Counties.shp"))
 ```
 
 ## Add State and County Fips to Small District Geography
 ```{r}
 #counties
-counties <- st_read(paste0("data/data",year,"/Utah_County_Boundaries-shp/Counties.shp")) %>%
+counties <- counties_shp %>%
   mutate(STATEFP20 = '49', 
          COUNTYFP20 = ifelse(nchar(FIPS) == 1, paste0("00",FIPS),paste0("0",FIPS))) %>%
   select(STATEFP20,COUNTYFP20) %>%
@@ -50,64 +62,54 @@ sdco <- st_join(sdc, counties, join = st_within) %>%
   left_join(sd) %>%
   st_as_sf()
 
-st_write(sdco, paste0("data/data",year,"/Dist_Small/Dist_Small_Counties.shp"))
+st_write(sdco, paste0("data/data",config_year,"/Dist_Small/Dist_Small_Counties.shp"),delete_dsn = TRUE)
 ```
-
-## View Map
+## Add State and County Fips to Medium District Geography
 ```{r}
-mapview(sdco) +
-  mapview(bgc)
+#join county/state data to small districts
+mdco <- st_join(mdc, counties, join = st_within) %>%
+  as_tibble() %>%
+  select(-geometry) %>%
+  left_join(md) %>%
+  st_as_sf()
+
+st_write(mdco, paste0("data/data",config_year,"/Dist_Medium/Dist_Medium_Counties.shp"),delete_dsn = TRUE)
+```
+## Add State and County Fips to Large District Geography
+```{r}
+#join county/state data to small districts
+ldco <- st_join(ldc, counties, join = st_within) %>%
+  as_tibble() %>%
+  select(-geometry) %>%
+  left_join(ld) %>%
+  st_as_sf()
+
+st_write(ldco, paste0("data/data",config_year,"/Dist_Large/Dist_Large_Counties.shp"),delete_dsn = TRUE)
 ```
 
 ## Join Small District Data to Block Groups
 ```{r}
 bgsd <- st_join(bgc, sd, join = st_within) %>%
-  select(1:3,16,17,4:18) %>%
+  select(STATEFP, COUNTYFP, TRACTCE, DISTSML, DSML_NAME,DISTMED, DMED_NAME, DISTLRG, DLRG_NAME, BLKGRPCE, GEOID, NAMELSAD, MTFCC, FUNCSTAT, ALAND, AWATER, INTPTLAT, INTPTLON, geometry) %>%
   select(-5) %>%
   as_tibble() %>%
   select(-geometry) %>%
   left_join(geo) %>%
   st_as_sf()
+
+st_write(bgsd, paste0("data/data",config_year,"/tl_",config_bg_year,"_49_bg/tl_",config_bg_year,"_49_sd_bg.shp"),delete_dsn = TRUE)
+```
+
+
+## View Mapss
+```{r}
+mapview(sdco) +
+  mapview(bgc)
 ```
 
 ```{r}
 mapview(bgsd)
 ```
-
-```{r}
-st_write(bgsd, paste0("data/data",year,"/tl_2020_49_bg/tl_2020_49_sd_bg.shp"))
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-### TAZ
-```{r}
-bgtaz <- st_read("C:/Users/cday/Documents/projects/Census-Block-to-TAZ/3-results/CensusBlockTAZSplitsWithHouseholds.shp")
-```
-
-```{r}
-mapview(bgtaz) + 
-  mapview(bg, col.regions = "red")
-```
-
-
-
 
 
 

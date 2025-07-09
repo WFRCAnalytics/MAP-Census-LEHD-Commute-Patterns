@@ -1,0 +1,108 @@
+---
+title: "Commuter Flow Map Load Time Comparison"
+output: html_document
+date: "2023-12-13"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+```
+
+```{r}
+library(tidyverse)
+library(rmarkdown)
+```
+
+
+## Data Sizes
+Block group data takes up the most data size by each geodatabase, followed by tract data.
+
+```{r}
+datasizes <- read_csv("results/datasizes.csv") %>%
+  filter(!is.na(Total)) %>%
+  rename('GDB' = 'Source GDB')
+
+datapct <- datasizes %>%
+  group_by(Layer) %>%
+  summarize(gTotal = sum(Total)) %>%
+  mutate(pct = gTotal / sum(gTotal) * 100)
+```
+
+```{r}
+ggplot(datasizes, aes(fill=Layer, y=Total, x=GDB)) +
+  geom_bar(position="stack", stat="identity") +
+  ggtitle("Data Size by Geodatabase") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+```
+
+Block group data takes up roughly 65.6% of total data size of the final web app (based on total rows/columns).
+
+```{r}
+ggplot(datapct, aes(x="", y=pct, fill=Layer)) +
+  ggtitle("Data Size by Layer Type") +
+  geom_bar(stat="identity", width=1) +
+  coord_polar("y", start=0) +
+  theme_void()
+paged_table(datapct)
+```
+
+## Load Times
+
+```{r}
+runtimes <- read_csv("results/runtimes.csv")
+
+firsttime <- runtimes %>% filter(Cache == '1st Time') %>%
+  select(!'Speed Index') %>%
+  pivot_longer(cols = c('Load Config', 'Load Map', 'Load Widget', 'Total'), names_to = 'Config', values_to = 'Value')
+
+webtest <- runtimes %>% filter(Cache == 'Webtest') %>%
+  select('Configuration', 'Total', 'Speed Index') %>%
+  pivot_longer(cols = c('Total','Speed Index'), names_to = 'Config', values_to='Value')
+```
+
+Total load time was calculated as the sum of "Load Config" time, "Load Map" time, and "Load Widget" time. The total load time decreased as a result of the following measures:
+
+ - Deleting Block Groups from the final web app
+ - Simplifying all polygon geometries
+ - Deleting Block groups and simplifying remaining geometries
+ - Same as 3rd bullet, plus doing the same for 2018 data (I forgot about 2018 data until now)
+
+```{r}
+ggplot(firsttime, aes(x=Configuration, y=Value, group=Config)) +
+  geom_line(aes(color=Config), size=1)+
+  geom_point(aes(color=Config), size=2) +
+  ggtitle("Load Time by Config Changes") + 
+  ylab("Value (seconds)") +
+scale_color_manual(values=c('lightgreen','darkturquoise','khaki','dodgerblue4')) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+```
+
+Load time was also calculated using a webspeed test. Load time was calculated as total load time as well as "speed index". Both are shown below.
+
+```{r}
+ggplot(webtest, aes(x=Configuration, y=Value, group=Config)) +
+  geom_line(aes(color=Config), size=1)+
+  geom_point(aes(color=Config), size=2) +
+  ggtitle("Load Time by Webspeed Test") + 
+  ylab("Value (seconds)") +
+scale_color_manual(values=c('lightgreen','dodgerblue4')) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+```
+
+## Results
+
+The final results showed that by eliminating block groups and simplifying geometries, load time decreased about 79%, from 29 seconds to 6 seconds.
+
+```{r}
+results1 <- firsttime %>% 
+  filter(Config == 'Total') %>%
+  select(Configuration,Value) %>%
+  mutate(Total = 29.07) %>%
+  mutate(pctDecrease = (Value - Total) / Total * 100,
+         absDecrease = (Value - Total)) %>%
+  select(Configuration,Total,Value,pctDecrease, absDecrease)
+paged_table(results1)
+```

@@ -1,0 +1,65 @@
+ 1.) Download All Nedded Data -- and extract to data/data{year} folder
+ 
+    a.) Download the LODES data from here: https://lehd.ces.census.gov/data/#j2j
+     - LODES section, version LODES8, State Utah, Type OD
+     - download ut_od_main_JT00_{year}.csv.gz
+     
+    b.) Download the Workplace LODES data from here: 
+     - LODES section, version LODES8, State Utah, Type WAC
+     - download ut_wac_S000_JT00_{year}.csv.gz
+    
+    c.) Download the tiger-line block groups here: https://www.census.gov/cgi-bin/geo/shapefiles/index.php
+     - select year, Block Group layer type, and Utah state
+     
+    d.) Download Census Blocks from most recent decennial census here: https://opendata.gis.utah.gov/datasets/utah-census-blocks-2020/about
+    
+    e.) Copy over Dist_Small, Dist_Med, and Dist_Lrg from latest model release
+    
+    f.) Download Counties shapefile from here: https://opendata.gis.utah.gov/datasets/utah-county-boundaries/about
+    
+    g.) Copy over the citytownship.csv (copy from previous year, or consult this spreadsheet: https://docs.google.com/spreadsheets/d/1rZIX50m9xLAl2E8uDrt8T08phyPgvYgGKjLjlULBxo0/edit?gid=0#gid=0)
+    
+    h.) Download Municipalities Dataset from here: https://opendata.gis.utah.gov/datasets/utah-municipal-boundaries/about
+
+    i.) Download Census Tracts from here: https://opendata.gis.utah.gov/datasets/utah-census-tracts-2020/about
+     - or copy from previous year's data folder
+     
+    j.) Download Census Counties from here: https://opendata.gis.utah.gov/datasets/utah-census-counties-2020/explore?showTable=true
+     - or copy from previous year's data folder
+     
+ 2.) Update the config.json file with new variable years
+ 
+ 3.) Run R Scripts
+   
+    a.) 0-AddSDtoBG.rmd -- run through each chunk, updating input files
+    
+    b.) 1-ProcessLEGNforCommutePatterns.rmd
+     - the purpose of this script is to run through all the lehd data inputs and
+       assign them to geographies
+     - be sure to double check the college locations, especially UofU and BYU since
+       they have had problems in the past. You man need to do a manual allocation
+       (note: this is a manual step that requiresthinking)
+       
+ 4.) Run Python (2-LEHDCommutePatterns-Web-App-DataPrep.ipynb)
+  - some years are hardcoded -- make sure to take note of that and update if needed
+  - double check in ArcGISPro that everything is looking ok
+
+ 5.) Upload to AGOL
+  - sign into agol with username: analytics_wfrc
+  - click on content/new item
+  - upload zipped .gbd from results folder
+  - after uploading, update description of the new feature layer
+  - locate Census LEHD Commute Patterns map -- open in map viewer
+  - add newly created feature layer, drag and drop all items into layers list
+  - add a new label class to each of the new layers
+  - save the map once all layers have been entered & label class turned on
+  
+ 6.) Update code
+  - 
+  
+     
+    
+    
+
+
+

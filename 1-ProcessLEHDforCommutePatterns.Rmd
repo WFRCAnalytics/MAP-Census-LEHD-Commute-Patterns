@@ -18,37 +18,41 @@ library(mapview)
 library(imputeTS)
 ```
 
-## Select Year of Analysis
+## Read Config Variables
 ```{r}
-year = '2019'
+config <- fromJSON("config.json")
+config_year <- config$year
+config_bg_year <- config$bg_year
+config_bk_year <- config$bk_year
+config_bk_geoid <- config$bk_geoid
 ```
 
 
 ## Data
 ```{r}
 #read in the LEHD data
-lehd_raw <- read_csv(paste0("data/data",year,"/ut_od_main_JT00_",year,".csv")) %>%
+lehd_raw <- read_csv(paste0("data/data",config_year,"/ut_od_main_JT00_",config_year,".csv")) %>%
   select(w_geocode, h_geocode, S000) # S000 is Number of Jobs
 ```
 
 ```{r}
 #read in township codes and adjust the shortdesc to make merging easier later on
-township_codes <- read_csv("data/data2019/citytownship.csv") %>%
+township_codes <- read_csv(paste0("data/data",config_year,"/citytownship.csv")) %>%
   select(1,2) %>%
   mutate(SHORTDESC = case_when(
-    CODE3 == "EMT" ~ "Emigration Canyon",
-    CODE3 == "CMT" ~ "Copperton",
-    CODE3 == "KMT" ~ "Kearns",
-    CODE3 == "MMT" ~ "Magna",
-    CODE3 == "WHT" ~ "White City",
+    CODE3 == "EMT" ~ "EMIGRATION CANYON",
+    CODE3 == "CMT" ~ "COPPERTON",
+    CODE3 == "KMT" ~ "KEARNS",
+    CODE3 == "MMT" ~ "MAGNA",
+    CODE3 == "WHT" ~ "WHITE CITY",
     TRUE ~ SHORTDESC
   ))
 ```
 
 ```{r}
-#read in the uofu adjustment factors
-uofu_adj <- read_csv("data/data2018/490351108004_Manual_Allocation.csv") %>%
-  mutate(GEOID = as.factor(GEOID))
+#read in the uofu adjustment factors (if needed)
+#uofu_adj <- read_csv("data/data2018/490351108004_Manual_Allocation.csv") %>%
+#  mutate(GEOID = as.factor(GEOID))
 ```
 
 ```{r}
@@ -59,49 +63,79 @@ wfrc_towns <- c("AFK","ALA","ALP","BDL","BGM","BNT","BRT","CDF","CEN","CHA","CHL
 
 ## Geographic Data
 ```{r}
-# block level coordinates
-blockcity <- read.dbf("data/data2019/blockcentersWBlockGroup.dbf") %>%
-  select(GEOID, GEOID10,x,y) %>% st_as_sf(coords = c("x","y"), crs = 4326) %>%
+#read in block group tiger line file for specific year
+blockgroups <- st_read(paste0("data/data",config_year,"/tl_",config_bg_year,"_49_bg/tl_",config_bg_year,"_49_bg.shp")) %>%
   st_transform(crs = 4326) %>%   
   st_as_sf() %>%
-  st_transform(26912) 
+  st_transform(26912) %>%
+  select(GEOID,geometry)
+```
+
+```{r}
+#read in blocks and convert to point geometry, merge blockgroups to get GEOID & GEOID20 in same file
+blockpoints <- st_read(paste0("data/data",config_year,"/CensusBlocks",config_bk_year,"/CensusBlocks",config_bk_year,".shp")) %>%
+  st_transform(crs = 4326) %>%   
+  st_as_sf() %>%
+  st_transform(26912) %>%
+  st_centroid() %>%
+  select(config_bk_geoid, geometry)%>%
+  st_join(blockgroups, join=st_within, left=TRUE) 
+  #mutate(
+  #  xcol = st_coordinates(geometry)[, 1],
+  #  ycol = st_coordinates(geometry)[, 2]
+  #) %>%
+  #st_transform(crs = 4326) %>%   
+  #st_as_sf() %>%
+  #st_transform(26912)
+
+#mapview(blockpoints)
+```
+
+```{r}
+## block level coordinates (for 2018 & 2019 data)
+#blockpoints <- read.dbf(paste0("data/data",year,"/blockcentersWBlockGroup.dbf")) %>%
+#  select(GEOID, GEOID10,x,y) %>% st_as_sf(coords = c("x","y"), crs = 4326) %>%
+#  st_transform(crs = 4326) %>%   
+#  st_as_sf() %>%
+#  st_transform(26912) 
 ```
 
 ```{r}
 # township shapefile
-sf_townships <- st_read("data/data2019/Municipalities_Township/Municipalities_Township.shp") %>%
+sf_townships <- st_read(paste0("data/data",config_year,"/Municipalities_Township/Municipalities_Township.shp")) %>%
   st_transform(crs = 4326) %>%   
   st_as_sf() %>%
   st_transform(26912) 
-
-mapview(blockcity) + 
-  mapview(sf_townships, color = "grey40")
 ```
 
 ## Merge Townships and Blockgroups
 ```{r}
 # get the township that corresponds to each block point
-blockpoint_city <- st_join(blockcity, sf_townships, join = st_within)
+blockpoint_city <- st_join(blockpoints, sf_townships, join = st_within) %>%
+  mutate_at(vars(1:2), as.double)
 blockpoint_city_full <- blockpoint_city %>%
-  select(GEOID, GEOID10, COUNTYNBR, NAME, SHORTDESC) %>%
+  select(GEOID, config_bk_geoid, COUNTYNBR, NAME, SHORTDESC) %>%
   left_join(township_codes, by = c("SHORTDESC" = "SHORTDESC")) %>%
-  select(GEOID10, CODE3, SHORTDESC) %>%
-  mutate(GEOID10 = as.numeric(as.character(GEOID10))) %>%
+  select(config_bk_geoid, CODE3, SHORTDESC) %>%
+  mutate(config_bk_geoid = as.numeric(as.character(config_bk_geoid))) %>%
   mutate(CODE3 = ifelse(is.na(CODE3), "XXX", CODE3),
          SHORTDESC = ifelse(is.na(SHORTDESC), "Outside Area", SHORTDESC))
 
 # get the township block point data that corresponds to the wfrc modeling area
-blockcity_wfrc <- blockpoint_city_full %>% 
+blockpoints_wfrc <- blockpoint_city_full %>% 
   mutate(CODE3 = ifelse(CODE3 %in% wfrc_towns, CODE3, "XXX"),
          SHORTDESC = ifelse(CODE3 %in% wfrc_towns, SHORTDESC, "Outside WFRC Area"))
+
+#mapview(blockpoints_wfrc %>% filter(CODE3 != 'XXX'))
 ```
+
 
 ## Process LEHD data at the Block level for home/work locations
 ```{r}
 # get home/work number of jobs at blockpoint city level
-homeside <- left_join(lehd_raw,blockpoint_city_full, by = c("h_geocode" = "GEOID10")) %>%
+homeside <- left_join(lehd_raw,blockpoint_city_full, by = c("h_geocode" = config_bk_geoid)) %>%
   mutate(h_geocode = as.character(h_geocode), w_geocode = as.character(w_geocode))
-workside <- left_join(lehd_raw,blockpoint_city_full, by = c("w_geocode" = "GEOID10")) %>%
+workside <- left_join(lehd_raw,blockpoint_city_full, by = c("w_geocode" = config_bk_geoid)) %>%
   mutate(h_geocode = as.character(h_geocode), w_geocode = as.character(w_geocode))
 
 # get home/work number of jobs at blockpoint city level for the wfrc modeling area
@@ -117,7 +151,7 @@ workside_wfrc <- workside %>%
 ```{r}
 # get every possible combination of block geoids and city/township
 blockseq <-  homeside_wfrc %>% 
-  left_join(blockcity, by = c("w_geocode" = "GEOID10")) %>%
+  left_join(blockpoints, by = c("w_geocode" = config_bk_geoid)) %>%
   expand(GEOID, CODE3 = (c(wfrc_towns,"XXX")))
 ```
 
@@ -125,7 +159,7 @@ blockseq <-  homeside_wfrc %>%
 # summarize home-based job data at the blockpoint-city/township level -- including totals
 # {CODE3}_h represents number of workers who have a home location in city/town
 homeside_wide <- homeside_wfrc %>%
-  left_join(blockcity, by = c("w_geocode" = "GEOID10")) %>%
+  left_join(blockpoints, by = c("w_geocode" = config_bk_geoid)) %>%
   select(-SHORTDESC, -h_geocode) %>%
   group_by(GEOID, CODE3) %>%
   summarize(SumS000 = sum(S000)) %>% ungroup() 
@@ -144,7 +178,7 @@ homeside_wide_ttl <- homeside_wide_full %>% as.tibble() %>%
 # summarize work-based job data at the blockpoint-city/township level -- including totals
 # {CODE3}_w represents number of workers who have a work location in city/town
 workside_wide <- workside_wfrc %>%
-  left_join(blockcity, by = c("h_geocode" = "GEOID10")) %>%
+  left_join(blockpoints, by = c("h_geocode" = config_bk_geoid)) %>%
   select(-SHORTDESC, -w_geocode) %>%
   group_by(GEOID, CODE3) %>%
   summarize(SumS000 = sum(S000)) %>% ungroup()
@@ -166,7 +200,10 @@ home_work_ttl <- left_join(homeside_wide_ttl, workside_wide_ttl)
 
 
 ## Fix Misplaced College Jobs
-In the 2018 data, there was about 20,000 additional educational jobs in block group 490351108004001. In addition, the block groups corresponding to UofU campus had about 18,000+ too few educational jobs. These additional educational jobs were moved from block group 490351108004001 to the UofU block groups as a guess to fix the data's inconsistency. For 2019, we will double check these block groups and fix the mistake if needed. 
+In the 2018 and 2019 data, there were about 20,000 additional educational jobs in holiday (block group 490351108004001) and about 18,000+ too few jobs in the UofU campus block group. And so, we reallocated them.
+
+In the 2022 data, holiday did not have any block groups with an over-abundance of educational jobs, and UofU block group looked to have a reasonable number. However, the majority of the educational jobs for BYU are located a few block groups north of the campus location. As a result, we reallocated these values below.
+
 
 Steps to follow:
   - Read in the "C" LEHD LODES dataset to determine the top five 5 block groups with educational jobs
@@ -176,84 +213,91 @@ Steps to follow:
   
 First we read in the blockgroup shapefile spatial dataframe. 
 ```{r}
-blockcity2 <- blockcity %>% as.tibble() %>% select(-geometry)
-blockgroups <- st_read("data/data2019/tl_2020_49_bg/tl_2020_49_bg.shp") %>%
+blockpoints2 <- blockpoints %>% as.tibble() %>% select(-geometry)
+blockgroups2 <- blockgroups %>%
   as_tibble() %>%
-  left_join(blockcity2) %>%
-  select(GEOID,GEOID10,geometry)
-geoid <- blockgroups %>% select(-GEOID10) %>%
+  left_join(blockpoints2) %>%
+  select(GEOID,config_bk_geoid,geometry)
+geoid <- blockgroups2 %>% select(-config_bk_geoid) %>%
   unique()
 ```
 
 We also read in the college shapefile to compare with the LDOES data.
 ```{r}
-slTazPolygon <- st_read("A:/1 - TDM/1 - Input Dev/0 - GlobalData/0 - TripTables/1 - College Base Year Enrollment Distribution/data/StreetLight_TAZ_2021_09_22/StreetLight_TAZ_2021_09_22.shp") %>%
+slTazPolygon <- st_read("data/data2019/SL_College/StreetLight_TAZ_2021_09_22.shp") %>%
   filter(SUBAREAID == 1) %>%
   select(SA_TAZID,SL_COTAZID) %>%
   st_set_crs(26912)
 
-collegePolygon <- read_csv("A:/1 - TDM/1 - Input Dev/0 - GlobalData/0 - TripTables/1 - College Base Year Enrollment Distribution/data/College_to_SL_COTAZID.csv") %>%
+collegePolygon <- read_csv("data/data2019/SL_College/College_to_SL_COTAZID.csv") %>%
   left_join(slTazPolygon) %>%
   st_as_sf()
 ```
 
-Next we read in the Workplace Area Characteristics (WAC) LODES data. This will tell us how many jobs exist within each GEOID10. We merge the block level data to get it at the block level. 
+Next we read in the Workplace Area Characteristics (WAC) LODES data. This will tell us how many jobs exist within each block. We merge the block level data to get it at the block level. 
 ```{r}
-utrac <- read_csv("data/data2019/ut_wac_S000_JT00_2019.csv") %>%
+utrac <- read_csv(paste0("data/data",config_year,"/ut_wac_S000_JT00_",config_year,".csv")) %>%
   mutate(w_geocode = as.factor(w_geocode)) %>%
   select(w_geocode,C000,CNS15) %>%
-  left_join(blockgroups, by = c("w_geocode" = "GEOID10")) %>%
+  left_join(blockpoints, by = c("w_geocode" = config_bk_geoid)) %>%
   group_by(GEOID) %>%
-  summarize(C000 = sum(C000),
-            CNS15 = sum(CNS15)) %>%
+  summarize(C000 = sum(C000),        # C000 = total jobs
+            CNS15 = sum(CNS15)) %>%  # CNS15 = educational jobs
   left_join(geoid) %>%
   arrange(desc(CNS15)) %>%
   st_as_sf()
   
-head(utrac,8)
+mapview(utrac)
 ```
+
 
 Below is a map comparing the location of blockgroups with more than 2000 educational jobs as well as the college locations. Notice how there is no block groups next to UofU! This means the data was not fixed for the 2019 LODES dataset, and we must reassign the educational employment in Holladay to the UofU area.
 
 ```{r}
 utracC <- utrac %>% filter(CNS15 > 2000)
+#utracC_Exact <- utrac %>% filter(GEOID %in% c(490490016022, 490490011033, 490351135103, 490351014022, 490351014011,490572015003))
+
+
 mapview(utracC, col.regions = "red") +
-  mapview(collegePolygon)
+  mapview(collegePolygon) +
+  mapview(utrac, col.regions='green')
 ```
 
 
 
 ```{r}
-UofU_hhjobsViewer <- data.frame(GEOID = c(490351014022, 490351014011, 490351014022, 490351014011, 490351108004, 490351108004),
-                               DESCRIP = c("UOFU", "UOFU_SOUTH", "UOFU", "UOFU_SOUTH", "HOLLADAY", "HOLLADAY"),
-                               SOURCE = c("TOT", "TOT", "EDU/OFF", "EDU/OFF", "TOT", "EDU/OFF"),
-                               HHJOB = c(41820, 4600, 38518, 4343, 1108, 771),
-                               LODES = c(14025, 1376, 44, 162, 22063, 21105)) %>%
+byu_2022_hhjobsViewer <- data.frame(GEOID = c(490490015042,490490016022),
+                                    DESCRIP = c('RockCanyonElem','BYU_Campus'),
+                                    SOURCE = c("TOT",'TOT','EDU/OFF','EDU/OFF'),
+                                    HHJOB = c(389, 15037, 285, 15037),
+                                    LODES = c(7879, 114, 7532, 0))%>%
   mutate(Difference = abs(HHJOB - LODES))
-tibble(UofU_hhjobsViewer)
+tibble(byu_2022_hhjobsViewer)
 ```
-After analyzing the map, we created a table which compares the employment data of the LODES dataset with the employment data from the Household and Job Forecasts Viewer for 2019 (https://wfrc.org/household-job-forecast-map/). It looks like for the main block group corresponding to UofU campus, a total of 27795 jobs are missing -- most of them we assume to be educational jobs because currently the LODES data only has 44 of those jobs in that area! 
+After analyzing the map, we created a table which compares the employment data of the LODES dataset with the employment data from the Household and Job Forecasts Viewer for 2022 (https://wfrc.org/household-job-forecast-map/). It looks like for the main block group corresponding to UofU campus, a total of 14923 jobs are missing -- most of them we assume to be educational jobs because currently the LODES data only has 0 of those jobs in that area! 
 
-Furthermore, we see that with block group 490351108004, the LODES data has 20955 too many jobs in that block group compared to the household and Jobs Forecast Viewer! And since the UofU block group is missing at 27795 overall jobs, we will make an assumption by moving 20955 jobs from block group 490351108004 to block group 490351014022 in the LODES data.
+Furthermore, we see that with block group 490490015042, the LODES data has 7490 too many jobs in that block group compared to the household and Jobs Forecast Viewer! And since the BYU block group is missing at 14923 overall jobs, we will make an assumption by moving 7490 jobs from block group 490490015042 to block group 490490016022 in the LODES data.
 
-This means we want to keep only 5.02% of jobs that currently exist in block group 490351108004. We also want to multiple the jobs within block group 490351014022 by 2.494 to get a total of 34,980 jobs in the UofU block group area (in other words to add the 20,955 jobs that we took away from the Holladay block group).
+This means we want to keep only 5.89% of jobs that currently exist in block group 490490015042 We also want to multiple the jobs within block group 490490016022 by 91.55 to get a total of 7604 jobs in the BYU block group area (in other words to add the 7490 jobs that we took away from the RockCanyonElem block group).
 
-Below we make the necessary adjustments by multiplying the two block groups by the ratio needed to correct for the UofU adjustment. Then, we "patch" these two block groups back into the processed dataset.
+Below we make the necessary adjustments by multiplying the two block groups by the ratio needed to correct for the BYU adjustment. Then, we "patch" these two block groups back into the processed dataset.
 
 ```{r}
-uofu_adjust <- home_work_ttl %>%
-  filter(GEOID %in% c('490351014022','490351108004'))
-uofu_adjust[1,c(2:98)] <- uofu_adjust[1,c(2:98)]*2.6882 #2.494, had to increase due to rounding error
-uofu_adjust[2,c(2:98)] <- uofu_adjust[2,c(2:98)]*0.0534 #.0502, had to increase due to rounding error
-uofu_adjust[1,1] <- '490351014022'
-uofu_adjust[2,1] <- '490351108004'
-uofu_adjustr <- uofu_adjust %>%
+byu_adjust <- home_work_ttl %>%
+  filter(GEOID %in% c('490490015042','490490016022'))
+byu_adjust[1,c(2:98)] <- byu_adjust[1,c(2:98)]*.0589
+byu_adjust[2,c(2:98)] <- byu_adjust[2,c(2:98)]*91.55
+byu_adjust[1,1] <- '490490015042'
+byu_adjust[2,1] <- '490490016022'
+byu_adjustr <- byu_adjust %>%
   mutate_if(is.numeric, round) %>%
   mutate(TTL_h = rowSums(.[2:98]))
 
+print(byu_adjustr['TTL_h'])
+
 home_work_ttl_fix <- home_work_ttl %>%
-  filter(!GEOID %in% c('490351014022','490351108004')) %>%
-  bind_rows(uofu_adjustr) %>%
+  filter(!GEOID %in% c('490490015042','490490016022')) %>%
+  bind_rows(byu_adjustr) %>%
   arrange(GEOID)
 ```
 
@@ -269,12 +313,16 @@ bind_rows(summarise(.,
                     across(where(is.numeric), sum),
                     across(where(is.factor), ~"colSUM"))) %>%
   slice(n(),1:(n()-1)) %>%
-  mutate(fakeid = ifelse(GEOID == "colSUM", 0,fakeid))
+  mutate(fakeid = ifelse(GEOID == "colSUM", 0,fakeid)) %>%
+  mutate(fakeid = ifelse(is.na(fakeid),0,fakeid)) %>%
+  mutate(GEOID = ifelse(is.na(GEOID),"colSUM",GEOID))
+
+triplecheck <-results_at_blockgroups%>%filter(GEOID=='490490016022')
 ```
 
 ## Result
 ```{r}
 #write output csv to be used in the python script which create the webapp inputs
-write_csv(results_at_blockgroups, paste0("data/data",year,"/lehd_at_blockgroup_level",year,".csv"))
+write_csv(results_at_blockgroups, paste0("data/data",config_year,"/lehd_at_blockgroup_level",config_year,".csv"))
 ```
 
