@@ -67,26 +67,6 @@ define([
 
       moveTopOnActive: false,
 
-      //Begin Added by CD 2023-03-22
-      _advanced: function() {
-        console.log('_advanced');
-        
-        if (dom.byId("advanced").innerHTML==sViewAdvanced) {
-          this.publishData({
-            message: "TurnOnAdvanced"
-          });
-          dom.byId("advanced").innerHTML = sViewBasic;
-        } else if(dom.byId("advanced").innerHTML==sViewBasic) {
-          this.publishData({
-            message: "TurnOnBasic"
-          });
-          dom.byId("advanced").innerHTML = sViewAdvanced;
-        }
-
-      },
-      //End Added by CD 2023-03-22
-
-
       postMixInProperties: function() {
         this.inherited(arguments);
         this.isRenderIdForAttrs = true;

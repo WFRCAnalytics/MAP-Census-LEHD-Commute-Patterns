@@ -43,7 +43,7 @@ township_codes <- read_csv(paste0("data/data",config_year,"/citytownship.csv")) 
     CODE3 == "EMT" ~ "EMIGRATION CANYON",
     CODE3 == "CMT" ~ "COPPERTON",
     CODE3 == "KMT" ~ "KEARNS",
-    CODE3 == "MMT" ~ "MAGNA",
+    CODE3 == "MMT" ~ "MAGNA CITY",
     CODE3 == "WHT" ~ "WHITE CITY",
     TRUE ~ SHORTDESC
   ))
@@ -71,6 +71,7 @@ blockgroups <- st_read(paste0("data/data",config_year,"/tl_",config_bg_year,"_49
   select(GEOID,geometry)
 ```
 
+
 ```{r}
 #read in blocks and convert to point geometry, merge blockgroups to get GEOID & GEOID20 in same file
 blockpoints <- st_read(paste0("data/data",config_year,"/CensusBlocks",config_bk_year,"/CensusBlocks",config_bk_year,".shp")) %>%
@@ -90,7 +91,6 @@ blockpoints <- st_read(paste0("data/data",config_year,"/CensusBlocks",config_bk_
 
 #mapview(blockpoints)
 ```
-
 ```{r}
 ## block level coordinates (for 2018 & 2019 data)
 #blockpoints <- read.dbf(paste0("data/data",year,"/blockcentersWBlockGroup.dbf")) %>%
@@ -100,18 +100,76 @@ blockpoints <- st_read(paste0("data/data",config_year,"/CensusBlocks",config_bk_
 #  st_transform(26912) 
 ```
 
+
 ```{r}
 # township shapefile
 sf_townships <- st_read(paste0("data/data",config_year,"/Municipalities_Township/Municipalities_Township.shp")) %>%
   st_transform(crs = 4326) %>%   
   st_as_sf() %>%
   st_transform(26912) 
+
+# backup township shapefile for invalid geometries
+sf_townships_backup <- st_read(paste0("data/data",2019,"/Municipalities_Township/Municipalities_Township.shp")) %>%
+  st_transform(crs = 4326) %>%   
+  st_as_sf() %>%
+  st_transform(26912)
+```
+
+```{r}
+# determine if some geometries are invalid
+if (length(invalid_idx) == 0) {
+  cat("✅ All geometries are valid.\n")
+} else {
+  sf_invalid <- sf_townships[invalid_idx, ]
+  cat("⚠️ Found", length(invalid_idx), "invalid geometries.\n")
+  print(st_is_valid(sf_invalid, reason = TRUE))
+  mapview::mapview(sf_invalid)
+}
+```
+
+```{r}
+#FIX INVALID GEOMETRIES - by replacing with previous set of valid ones
+
+# 1. Identify invalid geometries
+invalid_idx <- which(!st_is_valid(sf_townships))
+cat("⚠️ Found", length(invalid_idx), "invalid geometries to replace.\n")
+
+# 2. SHORTDESC of invalid rows
+invalid_shortdesc <- sf_townships$SHORTDESC[invalid_idx]
+
+# 3. Extract replacement rows from backup by SHORTDESC
+replacement_rows_all <- sf_townships_backup[sf_townships_backup$SHORTDESC %in% invalid_shortdesc, ]
+
+# 4. Drop invalid rows from sf_townships
+sf_townships_clean <- sf_townships[-invalid_idx, ]
+
+# 5. Align columns: get common columns
+common_cols <- intersect(names(sf_townships_clean), names(replacement_rows_all))
+
+# 6. Subset both to common columns (in sf_townships_clean order)
+sf_townships_clean_sub <- sf_townships_clean[, common_cols]
+replacement_rows_sub <- replacement_rows_all[, common_cols]
+
+# 7. For any columns in sf_townships_clean but missing in replacement_rows, add NA
+missing_cols <- setdiff(names(sf_townships_clean), names(replacement_rows_all))
+if (length(missing_cols) > 0) {
+  for (col in missing_cols) {
+    replacement_rows_sub[[col]] <- NA
+  }
+  # Reorder to sf_townships_clean column order
+  replacement_rows_sub <- replacement_rows_sub[, names(sf_townships_clean_sub)]
+}
+
+# 8. Combine
+sf_townships_fixed <- rbind(sf_townships_clean_sub, replacement_rows_sub)
+
+# 9. Optional: reorder by SHORTDESC if you want
+sf_townships_fixed <- sf_townships_fixed[order(sf_townships_fixed$SHORTDESC), ]
 ```
 
 ## Merge Townships and Blockgroups
 ```{r}
-# get the township that corresponds to each block point
-blockpoint_city <- st_join(blockpoints, sf_townships, join = st_within) %>%
+blockpoint_city <- st_join(blockpoints, sf_townships_fixed, join = st_within) %>%
   mutate_at(vars(1:2), as.double)
 blockpoint_city_full <- blockpoint_city %>%
   select(GEOID, config_bk_geoid, COUNTYNBR, NAME, SHORTDESC) %>%
@@ -278,15 +336,15 @@ After analyzing the map, we created a table which compares the employment data o
 
 Furthermore, we see that with block group 490490015042, the LODES data has 7490 too many jobs in that block group compared to the household and Jobs Forecast Viewer! And since the BYU block group is missing at 14923 overall jobs, we will make an assumption by moving 7490 jobs from block group 490490015042 to block group 490490016022 in the LODES data.
 
-This means we want to keep only 5.89% of jobs that currently exist in block group 490490015042 We also want to multiple the jobs within block group 490490016022 by 91.55 to get a total of 7604 jobs in the BYU block group area (in other words to add the 7490 jobs that we took away from the RockCanyonElem block group).
+This means we want to keep only 5.21% of jobs that currently exist in block group 490490015042 We also want to multiple the jobs within block group 490490016022 by 7676% to get a total of 7604 jobs in the BYU block group area (in other words to add the 7490 jobs that we took away from the RockCanyonElem block group).
 
 Below we make the necessary adjustments by multiplying the two block groups by the ratio needed to correct for the BYU adjustment. Then, we "patch" these two block groups back into the processed dataset.
 
 ```{r}
 byu_adjust <- home_work_ttl %>%
   filter(GEOID %in% c('490490015042','490490016022'))
-byu_adjust[1,c(2:98)] <- byu_adjust[1,c(2:98)]*.0589
-byu_adjust[2,c(2:98)] <- byu_adjust[2,c(2:98)]*91.55
+byu_adjust[1,c(2:98)] <- byu_adjust[1,c(2:98)]*.0521
+byu_adjust[2,c(2:98)] <- byu_adjust[2,c(2:98)]*76.76
 byu_adjust[1,1] <- '490490015042'
 byu_adjust[2,1] <- '490490016022'
 byu_adjustr <- byu_adjust %>%

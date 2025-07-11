@@ -25,7 +25,7 @@
   "appId": "",
   "authorizedCrossOriginDomains": [],
   "title": "Wasatch Front Commuter Patterns",
-  "subtitle": "Census LEHD, 2019 / StreetLight, 2019",
+  "subtitle": "Census LEHD, 2022",
   "keepAppState": true,
   "logo": "images/logo.png",
   "geometryService": "https://utility.arcgisonline.com/arcgis/rest/services/Geometry/GeometryServer",

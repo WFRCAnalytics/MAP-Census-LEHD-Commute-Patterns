@@ -1,0 +1,160 @@
+<div>
+  <div id="TAB_CONTROL" style="display: block;">
+    <table width="100%;">
+      <tbody>
+        <tr width="100%;">
+          <td id="LEHDCELL" width="33%;">
+            <div id="LEHD_CONTROL" class=  "selectedWidget" style="padding-top: 5px;" data-dojo-attach-event="onClick: _selectLEHD"><div id="LEHD_ICON" class="pictureLEHD"><div class="tabcontrol">LEHD            </div></div></div>
+          </td>
+          <td id="SLCELL" width="33%;" style="display: none;">
+            <div id="SL_CONTROL"   class="unselectedWidget" style="padding-top: 5px;" data-dojo-attach-event="onClick: _selectSL">  <div id="SL_ICON"   class="pictureSL"  ><div class="tabcontrol">StreetLight              </div></div></div>
+          </td>
+          <td id="LEHDVSLCELL" width="33%;" style="display: none;">
+            <div id="LEHDVSL_CONTROL" class="unselectedWidget" style="padding-top: 5px;" data-dojo-attach-event="onClick: _selectLEHDVSL"><div id="LEHDVSL_ICON" class="pictureLEHDVSL"><div class="tabcontrol">Comparison</div></div></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <br/>
+  <table width="330px;">
+    <tr>
+      <td colspan="2" id ="yDisplay">
+        <div class="thicker" style="display: inline;" >Select Year</div>
+          <div style="display: inline" id="cmbYear" data-dojo-type="dojox.form.Select"></div>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <td width="40px;">
+        <div class="thicker" style="display: inline; line-height: 200%;" >For </div>
+      </td>
+      <td valign="left">
+        <div style="display: inline" id="cmbArea" data-dojo-type="dojox.form.Select"></div>
+      </td>
+      <td align = "right">
+        <div id="ATO_Zoom" style="text-align: right; padding: 1px; display: inline; line-height: 150%;"><input type="checkbox" id="chkAutoZoom" name="AutoZoom" data-dojo-type="dijit/form/CheckBox" checked /><label for="chkAutoZoom"><small>&nbsp;Auto Zoom&nbsp;&nbsp;</small></label></div>
+      </td>
+    </tr>
+    <tr>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <td>
+        <div class="thicker" style="display: inline; line-height: 100%;" >Show<br/>me</div>
+      </td>
+      <td colspan="2"><div class="thicker" style="display: inline; line-height: 200%;" ></div><div style="display: inline" id="cmbCategory" data-dojo-type="dojox.form.Select"></div></td>
+    </tr>
+    <tr>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <td colspan="3"><div class="thicker" style="display: inline; line-height: 200%;" >Select Map Display Zones:</div></td>
+    </tr>
+    <tr>
+      <td>&nbsp;</td>
+      <td colspan="2"><div class="thicker" style="display: inline; line-height: 200%;" ></div><div style="display: inline" id="cmbMapUnit" data-dojo-type="dojox.form.Select"></div></td>
+    </tr>
+    <tr>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <td colspan="3"><div class="thicker" style="display: inline; line-height: 200%;" >Color Zones by:</div></td>
+      <tr>
+        <td>&nbsp;</td>
+        <td colspan="2">
+          <div id="dDisplay">
+            <div style="display: inline;" id="cmbDisplay" style="display: inline;"></div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>&nbsp;</td>
+        <td colspan="2">
+          <div id="cDisplay" style="display: none;">
+            <div style="display: inline;" id="cmbCDisplay" style="display: inline;"></div>
+          </div>
+        </td>
+      </tr>
+    </tr>
+  </table>
+  <br/>
+  <hr/>
+
+  <div id="divLegendArea" data-dojo-attach-event="onClick: showLegend">
+    <div id="Legend"></div>
+  </div>
+  <br/>
+  <table width="330px;">
+    <tr>
+      <td style="width:82px;"></td>
+      <td style="width:82px;"></td>
+      <td style="width:83px;"></td>
+      <td style="width:83px;" align="right"><div id="Labels" style="text-align: right; padding: 1px; display: inline; line-height: 150%;"><input type="checkbox" id="chkLabels"   name="Labels"   data-dojo-type="dijit/form/CheckBox" checked /><label for="chkLabels"  ><small>&nbsp;Show Labels</small></label></div></td>
+    </tr>
+  </table>  
+  <hr/>
+  <div id="areastats"></div>
+  <div id="countystats"></div>
+  <table width="330px;">
+    <tr>
+      <td>
+        <div id="toptentitle"></div>
+      </td>
+    </tr>
+    <tr id="toptenrow_01" data-dojo-attach-event="onClick: topTenZoom">
+      <td>
+        <div id="topten1"></div>
+      </td>
+    </tr>
+    <tr id="toptenrow_02" data-dojo-attach-event="onClick: topTenZoom">
+      <td>
+        <div id="topten2"></div>
+      </td>
+    </tr>
+    <tr id="toptenrow_03" data-dojo-attach-event="onClick: topTenZoom">
+      <td>
+        <div id="topten3"></div>
+      </td>
+    </tr>
+    <tr id="toptenrow_04" data-dojo-attach-event="onClick: topTenZoom">
+      <td>
+        <div id="topten4"></div>
+      </td>
+    </tr>
+    <tr id="toptenrow_05" data-dojo-attach-event="onClick: topTenZoom">
+      <td>
+        <div id="topten5"></div>
+      </td>
+    </tr>
+    <tr id="toptenrow_06" data-dojo-attach-event="onClick: topTenZoom">
+      <td>
+        <div id="topten6"></div>
+      </td>
+    </tr>
+    <tr id="toptenrow_07" data-dojo-attach-event="onClick: topTenZoom">
+      <td>
+        <div id="topten7"></div>
+      </td>
+    </tr>
+    <tr id="toptenrow_08" data-dojo-attach-event="onClick: topTenZoom">
+      <td>
+        <div id="topten8"></div>
+      </td>
+    </tr>
+    <tr id="toptenrow_09" data-dojo-attach-event="onClick: topTenZoom">
+      <td>
+        <div id="topten9"></div>
+      </td>
+    </tr>
+    <tr id="toptenrow_10" data-dojo-attach-event="onClick: topTenZoom">
+      <td>
+        <div id="topten10"></div>
+      </td>
+    </tr>
+  </table>
+  
+</div>

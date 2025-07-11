@@ -39,6 +39,9 @@
      - be sure to double check the college locations, especially UofU and BYU since
        they have had problems in the past. You man need to do a manual allocation
        (note: this is a manual step that requiresthinking)
+     - there is code in there as well to work with "invalid geometries" -- this is
+       a manual step where you should replace the invalid geometries with a previous 
+       version that has valid geometries
        
  4.) Run Python (2-LEHDCommutePatterns-Web-App-DataPrep.ipynb)
   - some years are hardcoded -- make sure to take note of that and update if needed
@@ -53,9 +56,17 @@
   - add newly created feature layer, drag and drop all items into layers list
   - add a new label class to each of the new layers
   - save the map once all layers have been entered & label class turned on
+  - Make sure that the County and Municipality/Townships layer are transparent 
+    with a border and correct labels
   
  6.) Update code
-  - 
+  - update Widgets
+     - _site\widgets\LEHDCommutePatternsSidebar  -- Widget.js and Widget.html
+     - _site\themes\JewelryBoxTheme\widgets\HeaderController -- Widget.js and Widget.html
+     - _site\configs\About\config_widgets_About_Widget_37.json -- info tab
+     - _site\config.json -- update date     
+
+ 7.) Drag and Drop into Filezilla -- double check values
   
      
     
