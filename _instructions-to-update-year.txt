@@ -55,6 +55,13 @@
   - locate Census LEHD Commute Patterns map -- open in map viewer
   - add newly created feature layer, drag and drop all items into layers list
   - add a new label class to each of the new layers
+        - BlockGroup -- GEOID
+        - Tract -- TRACTCE20
+	- SD -- DSML_NAME
+	- MD -- DMED_NAME
+	- LD -- DLRG_NAME
+	- City -- CODE3	
+	- County -- COUNTYFP20
   - save the map once all layers have been entered & label class turned on
   - Make sure that the County and Municipality/Townships layer are transparent 
     with a border and correct labels
