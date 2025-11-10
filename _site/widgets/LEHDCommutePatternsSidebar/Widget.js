@@ -20,9 +20,9 @@ sDefaultDisplay = "number"; //must be same as "selected" above
 var dMapUnitOptions = [
   { label: "City level"                  , name: "City"                  , name_plural: "Cities"                 , value: "city"      , fieldname: "CODE3"     , minScaleForLabels: 3000000, selected: true },
   //{ label: "County"                      , name: "County"                , name_plural: "County"                 , value: "county"    , fieldname: "FIRST_NAME", minScaleForLabels:  800000                 },
-  { label: "Census Large District level" , name: "Census Large District" , name_plural: "Census Large Districts" , value: "ld"        , fieldname: "DLRG_NAME" , minScaleForLabels:  800000                 },
-  { label: "Census Medium District level", name: "Census Medium District", name_plural: "Census Medium Districts", value: "md"        , fieldname: "DMED_NAME" , minScaleForLabels:  800000                 },
-  { label: "Census Small District level" , name: "Census Small District" , name_plural: "Census Small Districts" , value: "sd"        , fieldname: "DSML_NAME" , minScaleForLabels:  800000                 },
+  { label: "Large District level"         , name: "Large District"       , name_plural: "Large Districts"        , value: "ld"        , fieldname: "DLRG_NAME" , minScaleForLabels:  800000                 },
+  { label: "Medium District level"        , name: "Medium District"      , name_plural: "Medium Districts"       , value: "md"        , fieldname: "DMED_NAME" , minScaleForLabels:  800000                 },
+  { label: "Small District level"         , name: "Small District"       , name_plural: "Small Districts"        , value: "sd"        , fieldname: "DSML_NAME" , minScaleForLabels:  800000                 },
   { label: "Census Tract level"          , name: "Census Tract"          , name_plural: "Census Tracts"          , value: "tract"     , fieldname: "GEOID20"   , minScaleForLabels:  800000                 },
   { label: "Census Block Group level"    , name: "Census Block Group"    , name_plural: "Census Block Groups"    , value: "blockgroup", fieldname: "GEOID"     , minScaleForLabels:  150000                 }
 ];
@@ -661,6 +661,7 @@ function(declare, BaseWidget, LayerInfos, RainbowVis, dom, PanelManager, LayerIn
         }
         
         _displayname = dMapUnitOptions[sidebar.getCurMapUnitPos()].name_plural;
+        _displaynamesingular = dMapUnitOptions[sidebar.getCurMapUnitPos()].name;
 
         _countystats = "";
 
@@ -686,7 +687,7 @@ function(declare, BaseWidget, LayerInfos, RainbowVis, dom, PanelManager, LayerIn
           dData = dCountyData_percent_sa;
         } else if (curDisplay == 'percent_mu') {
           dData = dCountyData_percent_mu;
-          dom.byId("toptentitle").innerHTML = dom.byId("toptentitle").innerHTML + "<p><strong>(Share of People in Each City)</strong></p>"
+          dom.byId("toptentitle").innerHTML = dom.byId("toptentitle").innerHTML + "<p><strong>(Share of People in Each " + _displaynamesingular + ")</strong></p>"
           _countystats = _countystats + "<p><strong>(Share of People in Each County)</strong></p><table width=\"330px;\">";
         }
 
